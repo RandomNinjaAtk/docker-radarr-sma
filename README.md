@@ -21,7 +21,11 @@ The architectures supported by this image are:
 | Tag | Description |
 | :----: | --- |
 | latest | Radarr Stable releases - latest ffmpeg snapshot |
-| preview | Radarr Preview releases - latest ffmpeg snapshot |
+| latest-vaapi | Radarr Stable releases - latest ffmpeg snapshot with vaapi HW acceleration |
+| latest-nvidia | Radarr Stable releases - latest ffmpeg snapshot with nvidia HW acceleration |
+| preview | Radarr Aphrodite (V3) releases - latest ffmpeg snapshot |
+| preview-vaapi | Radarr Aphrodite (V3) releases - latest ffmpeg snapshot with vaapi HW acceleration |
+| preview-nvidia | Radarr Aphrodite (V3) releases - latest ffmpeg snapshot with nvidia HW acceleration |
 
 ## Parameters
 
