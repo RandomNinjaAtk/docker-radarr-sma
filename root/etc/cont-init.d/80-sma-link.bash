@@ -17,20 +17,23 @@ if [ ! -f "/usr/local/sma/config/autoProcess.ini" ]; then
 fi
 
 # remove sickbeard_mp4_automator log if exists
-if [ -f "/var/log/sickbeard_mp4_automator/index.log" ]; then
-	rm "/var/log/sickbeard_mp4_automator/index.log"
+if [ -f "/var/log/sma.log" ]; then
+	rm "/var/log/sma.log"
 fi
 
 # remove sickbeard_mp4_automator log from sma config folder if exists
 if [ -f "/config/sma/index.log" ]; then
 	rm "/config/sma/index.log"
 fi
+if [ -f "/config/sma/sma.log" ]; then
+	rm "/config/sma/sma.log"
+fi
 
 # create sma log file
-touch "/config/sma/index.log" && \
+touch "/config/sma/sma.log" && \
 
 # link sma log file
-ln -s "/config/sma/index.log" "/var/log/sickbeard_mp4_automator/index.log" && \
+ln -s "/config/sma/sma.log" "/var/log/sma.log" && \
 
 # set permissions
 chmod 0666 "/config/sma"/*
