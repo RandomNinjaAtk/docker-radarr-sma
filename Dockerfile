@@ -1,6 +1,6 @@
 ARG ffmpeg_tag=snapshot-ubuntu
 FROM jrottenberg/ffmpeg:${ffmpeg_tag} as ffmpeg
-FROM mdhiggins/radarr-sma:latest
+FROM mdhiggins/radarr-sma:preview
 LABEL maintainer="RandomNinjaAtk"
 
 RUN \ 
