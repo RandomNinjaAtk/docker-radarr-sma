@@ -27,7 +27,7 @@ Container images are configured using parameters passed at runtime (such as thos
 
 Access the webui at `<your-ip>:7878`, for more information check out [Radarr](https://radarr.video/).
 
-# Sonarr Configuration
+# Radarr Configuration
 
 ### Enable completed download handling
 * Settings -> Download Client -> Completed Download Handling -> Enable: Yes
