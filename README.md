@@ -69,4 +69,14 @@ Access the webui at `<your-ip>:7878`, for more information check out [Radarr](ht
 Located at `/config/sma/autoProcess.ini` inside the container
 
 ### Log Information
-Located at `/config/sma/index.log` inside the container
+Located at `/config/sma/sma.log` inside the container
+
+### Hardware Acceleration
+
+1. After container start, locate `/config/sma/autoProcess.ini`
+1. Edit the `[Video]` options as specified below:
+	* vaapi
+		* Set video codec to: `h264vaapi` or `h265vaapi`
+	* nvidia
+		* Set video codec to: `h264_nvenc` or `h265_nvenc`
+1. Make sure you have passed the correct device to the container, or these will not work...
