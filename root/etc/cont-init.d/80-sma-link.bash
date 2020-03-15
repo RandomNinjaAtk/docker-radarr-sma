@@ -8,7 +8,7 @@ fi
 
 # import new config, if does not exist
 if [ ! -f "/config/sma/autoProcess.ini" ]; then
-	cp "/usr/local/sma/config/autoProcess.ini.sample" "/config/sma/autoProcess.ini"
+	cp "/usr/local/sma/setup/autoProcess.ini.sample" "/config/sma/autoProcess.ini"
 fi
 
 # link config file for use
