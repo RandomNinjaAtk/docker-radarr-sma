@@ -3,7 +3,7 @@
 [Radarr](https://github.com/Radarr/Radarr) - A fork of Sonarr to work with movies à la Couchpotato.
 
 
-[![radarr](https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/radarr.png)](https://github.com/Radarr/Radarr)
+[![radarr](https://raw.githubusercontent.com/RandomNinjaAtk/unraid-templates/master/randomninjaatk/img/radarr.png)](https://github.com/Radarr/Radarr)
 
 This containers base image is provided by: [mdhiggins/radarr-sma](https://github.com/mdhiggins/radarr-sma)
 
@@ -21,7 +21,11 @@ The architectures supported by this image are:
 | Tag | Description |
 | :----: | --- |
 | latest | Radarr Stable releases - latest ffmpeg snapshot |
-| preview | Radarr Preview releases - latest ffmpeg snapshot |
+| latest-vaapi | Radarr Stable releases - latest ffmpeg snapshot with vaapi HW acceleration |
+| latest-nvidia | Radarr Stable releases - latest ffmpeg snapshot with nvidia HW acceleration |
+| preview | Radarr Aphrodite (V3) releases - latest ffmpeg snapshot |
+| preview-vaapi | Radarr Aphrodite (V3) releases - latest ffmpeg snapshot with vaapi HW acceleration |
+| preview-nvidia | Radarr Aphrodite (V3) releases - latest ffmpeg snapshot with nvidia HW acceleration |
 
 ## Parameters
 
@@ -65,4 +69,14 @@ Access the webui at `<your-ip>:7878`, for more information check out [Radarr](ht
 Located at `/config/sma/autoProcess.ini` inside the container
 
 ### Log Information
-Located at `/config/sma/index.log` inside the container
+Located at `/config/sma/sma.log` inside the container
+
+### Hardware Acceleration
+
+1. After container start, locate `/config/sma/autoProcess.ini`
+1. Edit the `[Video]` options as specified below:
+	* vaapi
+		* Set video codec to: `h264vaapi` or `h265vaapi`
+	* nvidia
+		* Set video codec to: `h264_nvenc` or `h265_nvenc`
+1. Make sure you have passed the correct device to the container, or these will not work...
