@@ -61,12 +61,9 @@ Access the webui at `<your-ip>:7878`, for more information check out [Radarr](ht
 | On Rename | No |
 | On Health Issue | No |
 | Tags | leave blank |
-| Path | `/usr/local/sma/postRadarr.sh` |
+| Path | `/scripts/postRadarr.sh` |
 
 # SMA Information:
-
-### Config Location
-Located at `/config/sma/autoProcess.ini` inside the container
 
 ### Log Information
 Located at `/config/sma/sma.log` inside the container
