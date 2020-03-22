@@ -1,4 +1,4 @@
-ROM jrottenberg/ffmpeg:snapshot-vaapi as ffmpeg
+FROM jrottenberg/ffmpeg:snapshot-vaapi as ffmpeg
 FROM linuxserver/radarr:preview
 LABEL maintainer="RandomNinjaAtk"
 
