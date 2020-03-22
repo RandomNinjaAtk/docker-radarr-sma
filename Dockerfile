@@ -1,5 +1,5 @@
 FROM jrottenberg/ffmpeg:snapshot-vaapi as ffmpeg
-FROM linuxserver/radarr:preview
+FROM linuxserver/radarr:latest
 LABEL maintainer="RandomNinjaAtk"
 
 ENV SMA_PATH /usr/local/sma
