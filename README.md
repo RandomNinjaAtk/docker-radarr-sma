@@ -20,10 +20,8 @@ The architectures supported by this image are:
 
 | Tag | Description |
 | :----: | --- |
-| latest | Radarr Stable releases - latest ffmpeg (vaapi) |
-| latest-nvidia | Radarr Stable releases - latest ffmpeg (nvidia) |
-| preview | Radarr Aphrodite (V3) releases - latest ffmpeg (vaapi) |
-| preview-nvidia | Radarr Aphrodite (V3) releases - latest ffmpeg (nvidia) |
+| latest | Radarr Stable + SMA + ffmpeg) |
+| preview | Radarr Aphrodite (V3) + SMA + ffmpeg |
 
 ## Parameters
 
@@ -40,6 +38,8 @@ Container images are configured using parameters passed at runtime (such as thos
 | `-v /storage` | Location of Movie Library and Download managers output directory |
 | `-e UPDATE_SMA="FALSE"` | TRUE = enabled :: Update SMA on container startup |
 | `-e CONVERTER_THREADS="0"` | FFMpeg threads, corresponds to threads parameter |
+| `-e CONVERTER_HWACCELS=""` | Approved FFmpeg hardware accelerator encoders: hwaccels |
+| `-e CONVERTER_HWACCEL_DECODERS=""` | Approved FFmpeg hardware decoders |
 | `-e CONVERTER_OUTPUT_FORMAT="mkv"` | Wrapped format corresponding to -f in FFmpeg |
 | `-e CONVERTER_OUTPUT_EXTENSION="mkv"` | File extension for created media |
 | `-e CONVERTER_SORT_STREAMS="True"` | Sort streams by language preferences and channels |
@@ -61,7 +61,7 @@ Container images are configured using parameters passed at runtime (such as thos
 | `-e VIDEO_PROFILE=""` | Video profile |
 | `-e VIDEO_MAX_LEVEL="4.1"` | Maximum video level, videos above will be down sampled. Format example is 4.1 |
 | `-e VIDEO_PIX_FMT=""` | Supported pix-fmt list. Formats not on this list are be converted to the first format on the list |
-| `-e AUDIO_CODEC="libfdk_aac, aac, mp3, opus"` | Approved audio codecs. Codecs not on this list are converted to the first codec on the list |
+| `-e AUDIO_CODEC="ac3, eac3, aac, mp3, opus"` | Approved audio codecs. Codecs not on this list are converted to the first codec on the list |
 | `-e AUDIO_LANGUAGES="eng"` | Approved audio stream languages. Languages not on this list will not be used. Leave blank to approve all languages |
 | `-e AUDIO_DEFAULT_LANGUAGE="eng"` | If audio stream language is undefined, assumed this language |
 | `-e AUDIO_FIRST_STREAM_OF_LANGUAGE="False"` | Only include the first occurrence of an audio stream of language |
@@ -75,7 +75,7 @@ Container images are configured using parameters passed at runtime (such as thos
 | `-e AUDIO_COPY_ORIGINAL="True"` | Always include a copy of the original audio stream |
 | `-e AUDIO_AAC_ADTSTOASC="False"` |  |
 | `-e AUDIO_IGNORE_TREHD="mp4, m4v"` | Ignore trueHD audio streams for specific extensions (Not supported in MP4 containers). Leave blank to disable |
-| `-e UAUDIO_CODEC=""libfdk_aac, aac, mp3"` | Approved audio codecs. Codecs not on this list are converted to the first codec on the list |
+| `-e UAUDIO_CODEC=""aac, mp3, opus"` | Approved audio codecs. Codecs not on this list are converted to the first codec on the list |
 | `-e UAUDIO_CHANNEL_BITRATE="80"` |  Bitrate of universal audio stream per channel. Multiple by number of channels to get stream bitrate. Use 0 to attempt to guess based on source bitrate |
 | `-e UAUDIO_FIRST_STREAM_ONLY="True"` | Only create a universal audio stream for the first audio stream encountered |
 | `-e UAUDIO_MOVE_AFTER="True"` | Move universal audio stream after the source stream |
@@ -129,5 +129,5 @@ Located at `/config/sma/sma.log` inside the container
 
 ### Hardware Acceleration
 
-1. Set "SMA: Video: codec" to: `h264vaapi` or `h265vaapi`
+1. Set `VIDEO_CODEC` to: `h264vaapi` or `h265vaapi`
 1. Make sure you have passed the correct device to the container, or these will not work...
