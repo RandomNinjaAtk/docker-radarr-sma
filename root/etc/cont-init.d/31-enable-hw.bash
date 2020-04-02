@@ -23,4 +23,5 @@ done
 if [ -n "${FILES}" ] && [ ! -f "/groupadd" ]; then
   usermod -a -G root abc
 fi
-exit 0
+
+exit $?
