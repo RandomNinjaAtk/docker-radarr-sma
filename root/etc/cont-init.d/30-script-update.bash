@@ -6,4 +6,4 @@ if [[ "${UPDATE_SMA}" == "TRUE" ]]; then
     git -C ${SMA_PATH} pull origin master
 fi
 
-exit 0
+exit $?
