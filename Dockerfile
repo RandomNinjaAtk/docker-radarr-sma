@@ -33,7 +33,7 @@ RUN \
 	pip3 install -r ${SMA_PATH}/setup/requirements.txt && \
 	echo "************ setup cron ************" && \
 	service cron start && \
-	echo "* * * * *   root   bash /etc/cont-init.d/33-sma-config-update.bash" >> "/etc/crontab"
+	echo "* * * * *   root   bash /scripts/update.bash" >> "/etc/crontab"
 	
 WORKDIR /
 
