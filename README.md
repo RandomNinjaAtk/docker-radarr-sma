@@ -20,7 +20,7 @@ The architectures supported by this image are:
 
 | Tag | Description |
 | :----: | --- |
-| latest | Radarr Stable + SMA + ffmpeg) |
+| latest | Radarr Stable + SMA + ffmpeg |
 | preview | Radarr Aphrodite (V3) + SMA + ffmpeg |
 
 ## Parameters
