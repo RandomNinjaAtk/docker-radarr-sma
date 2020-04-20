@@ -5,7 +5,7 @@
 
 [![radarr](https://raw.githubusercontent.com/RandomNinjaAtk/unraid-templates/master/randomninjaatk/img/radarr.png)](https://github.com/Radarr/Radarr)
 
-This containers base image is provided by: [mdhiggins/radarr-sma](https://github.com/mdhiggins/radarr-sma)
+This containers base image is provided by: [linuxserver/radarr](https://github.com/linuxserver/docker-radarr)
 
 
 ## Supported Architectures
