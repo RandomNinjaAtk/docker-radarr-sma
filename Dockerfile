@@ -7,6 +7,9 @@ ENV SMA_APP Radarr
 
 RUN \
 	echo "************ install dependencies ************" && \
+	apt-get update && \
+	apt-get install -y software-properties-common && \
+	add-apt-repository ppa:jonathonf/ffmpeg-4 -y && \
 	echo "************ install packages ************" && \
 	apt-get update -qq && \
 	apt-get install -qq -y \
@@ -18,14 +21,6 @@ RUN \
 		cron && \
 	apt-get purge --auto-remove -y && \
 	apt-get clean && \
-	echo "************ add repos for updated ffmpeg ************" && \
-	apt-get install -y software-properties-common && \
-	add-apt-repository ppa:savoury1/graphics -y && \
-	add-apt-repository ppa:savoury1/multimedia -y && \
-	add-apt-repository ppa:savoury1/ffmpeg4 -y && \
-	echo "************ install updated ffmpeg ************" && \
-	apt-get update && \
-	apt-get install -y ffmpeg && \
 	echo "************ setup SMA ************" && \
 	echo "************ setup directory ************" && \
 	mkdir -p ${SMA_PATH} && \
