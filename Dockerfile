@@ -21,6 +21,9 @@ RUN \
 		cron && \
 	apt-get purge --auto-remove -y && \
 	apt-get clean && \
+	echo "************ install youtube-dl ************" && \
+  	curl -L https://yt-dl.org/downloads/latest/youtube-dl -o /usr/local/bin/youtube-dl && \
+   	chmod a+rx /usr/local/bin/youtube-dl && \
 	echo "************ setup SMA ************" && \
 	echo "************ setup directory ************" && \
 	mkdir -p ${SMA_PATH} && \
