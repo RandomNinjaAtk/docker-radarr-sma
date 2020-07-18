@@ -15,5 +15,7 @@ if [ ! -f "/config/scripts/DownloadTrailer.bash" ]; then
 	cp "/scripts/DownloadTrailer.bash" "/config/scripts/DownloadTrailer.bash"
 fi
 
-chmod 0777 -R "/scripts"
+# set permissions
+chmod 0777 -R "/config/scripts"
+
 exit $?
