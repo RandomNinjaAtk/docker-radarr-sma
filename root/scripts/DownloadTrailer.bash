@@ -37,33 +37,35 @@ if [ -z "$radarrtrailerid" ]; then
     exit 0
 fi
 echo "Processing :: $radarrmovietitle"
-if [ -f "$radarrmoviepath/$radarrmoviefolder-trailer.mp4" ]; then
+if [ -f "$radarrmoviepath/$radarrmoviefolder-trailer.mkv" ]; then
     echo "$radarrmovietitle :: Trailer already Downloaded..."
     exit 0
 fi
-$python $YoutubeDL ${cookies} -o "$radarrmoviepath/$radarrmoviefolder-trailer" ${videoformat} --write-sub --sub-lang $subtitlelanguage --embed-subs --merge-output-format mp4 --no-mtime --geo-bypass "$youtubeurl" &> /dev/null
-if [ -f "$radarrmoviepath/$radarrmoviefolder-trailer.mp4" ]; then   
-    echo "Processing :: $radarrmovietitle :: DOWNLOAD :: Complete!"
-    ffmpeg -y \
-		-i "$radarrmoviepath/$radarrmoviefolder-trailer.mp4" \
+$python $YoutubeDL ${cookies} -o "$radarrmoviepath/$radarrmoviefolder-trailer" ${videoformat} --write-sub --sub-lang $subtitlelanguage --embed-subs --merge-output-format mkv --no-mtime --geo-bypass "$youtubeurl" &> /dev/null
+if [ -f "$radarrmoviepath/$radarrmoviefolder-trailer.mkv" ]; then   
+	echo "Processing :: $radarrmovietitle :: TRAILER DOWNLOAD :: Complete!"
+	ffmpeg -y \
+		-i "$radarrmoviepath/$radarrmoviefolder-trailer.mkv" \
 		-vframes 1 -an -s 640x360 -ss 30 \
 		"$radarrmoviepath/$radarrmoviefolder-trailer.jpg" &> /dev/null
-	mv "$radarrmoviepath/$radarrmoviefolder-trailer.mp4" "$radarrmoviepath/temp.mp4"
+	mv "$radarrmoviepath/$radarrmoviefolder-trailer.mkv" "$radarrmoviepath/temp.mkv"
 	ffmpeg -y \
-		-i "$radarrmoviepath/temp.mp4" \
+		-i "$radarrmoviepath/temp.mkv" \
 		-i "$radarrmoviepath/$radarrmoviefolder-trailer.jpg" \
-		-map 0 -map 1 -c copy -c:v:1 jpg -disposition:v:1 attached_pic \
 		-c:v copy \
 		-c:a copy \
 		-c:s copy \
-		-metadata title="${radarrmovietitle}" \
-		-metadata date="$radarrmovieyear" \
-		-metadata genre="$radarrmoviegenre" \
-		-movflags +faststart \
-		"$radarrmoviepath/$radarrmoviefolder-trailer.mp4" &> /dev/null
-	rm "$radarrmoviepath/temp.mp4"
+		-metadata TITLE="${radarrmovietitle}" \
+		-metadata DATE_RELEASE="$radarrmovieyear" \
+		-metadata DATE="$radarrmovieyear" \
+		-metadata YEAR="$radarrmovieyear" \
+		-metadata GENRE="$radarrmoviegenre" \
+		-metadata COPYRIGHT="$radarrmovieostudio" \
+		-attach "$radarrmoviepath/$radarrmoviefolder-trailer.jpg" -metadata:s:t mimetype=image/jpeg \
+		"$radarrmoviepath/$radarrmoviefolder-trailer.mkv" &> /dev/null
+	rm "$radarrmoviepath/temp.mkv"
 	if [ -f "$radarrmoviepath/$radarrmoviefolder-trailer.jpg" ]; then 
-       	rm "$radarrmoviepath/$radarrmoviefolder-trailer.jpg"
+		rm "$radarrmoviepath/$radarrmoviefolder-trailer.jpg"
 	fi
 fi
 echo "Processing :: $radarrmovietitle :: Complete!"
