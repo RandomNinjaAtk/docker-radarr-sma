@@ -42,10 +42,10 @@ if [ ${radarrmoviefilename: -4} == ".mkv" ]; then
 		-metadata DIRECTOR="$radarrmoviedirector" \
 		-attach "/config/MediaCover/$radarrid/poster.jpg" -metadata:s:t mimetype=image/jpeg \
 		"$radarrmoviepath/$radarrmoviefilename" &> /dev/null
-	if 	[ -f "$radarrmoviepath/$radarrmoviefilename" ]; then
+	if [ -f "$radarrmoviepath/$radarrmoviefilename" ]; then
 		rm "$radarrmoviepath/temp.mkv"
 		echo "Processing :: $radarrmovietitle :: Updating File Statistics"
-		mkvpropedit "$radarrmoviepath/$radarrmoviefilename" --add-track-statistics-tags
+		mkvpropedit "$radarrmoviepath/$radarrmoviefilename" --add-track-statistics-tags &> /dev/null
 		echo "Processing :: $radarrmovietitle :: Complete!"
 	else
 		echo "Processing :: $radarrmovietitle :: Failed!"
