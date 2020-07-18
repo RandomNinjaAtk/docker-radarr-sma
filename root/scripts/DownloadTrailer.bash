@@ -7,7 +7,7 @@ YoutubeDL="/usr/local/bin/youtube-dl"
 subtitlelanguage="en"
 scriptpath="/config/scripts"
 
-exec &> "$scriptpath/postprocessor.txt"
+exec &> "$scriptpath/DownloadTrailer.log"
 
 if [ -f "$scriptpath/cookies.txt" ]; then
 	cookies="--cookies $scriptpath/cookies.txt"
@@ -43,7 +43,7 @@ if [ -f "$radarrmoviepath/$radarrmoviefolder-trailer.mp4" ]; then
 fi
 $python $YoutubeDL ${cookies} -o "$radarrmoviepath/$radarrmoviefolder-trailer" ${videoformat} --write-sub --sub-lang $subtitlelanguage --embed-subs --merge-output-format mp4 --no-mtime --geo-bypass "$youtubeurl" &> /dev/null
 if [ -f "$radarrmoviepath/$radarrmoviefolder-trailer.mp4" ]; then   
-    echo "$radarrmovietitle :: DOWNLOAD :: Complete!"
+    echo "Processing :: $radarrmovietitle :: DOWNLOAD :: Complete!"
     ffmpeg -y \
 		-i "$radarrmoviepath/$radarrmoviefolder-trailer.mp4" \
 		-vframes 1 -an -s 640x360 -ss 30 \
@@ -66,4 +66,5 @@ if [ -f "$radarrmoviepath/$radarrmoviefolder-trailer.mp4" ]; then
        	rm "$radarrmoviepath/$radarrmoviefolder-trailer.jpg"
 	fi
 fi
+echo "Processing :: $radarrmovietitle :: Complete!"
 exit 0
