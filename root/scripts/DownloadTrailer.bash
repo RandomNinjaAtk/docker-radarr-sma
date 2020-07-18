@@ -67,6 +67,8 @@ if [ -f "$radarrmoviepath/$radarrmoviefolder-trailer.mkv" ]; then
 	if [ -f "$radarrmoviepath/$radarrmoviefolder-trailer.jpg" ]; then 
 		rm "$radarrmoviepath/$radarrmoviefolder-trailer.jpg"
 	fi
+	echo "Processing :: $radarrmovietitle :: Updating File Statistics"
+	mkvpropedit "$radarrmoviepath/$radarrmoviefolder-trailer.mkv" --add-track-statistics-tags &> /dev/null
 fi
 echo "Processing :: $radarrmovietitle :: Complete!"
 exit 0
