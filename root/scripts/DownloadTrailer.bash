@@ -7,7 +7,7 @@ YoutubeDL="/usr/local/bin/youtube-dl"
 subtitlelanguage="en"
 scriptpath="/config/scripts"
 
-exec &> "$scriptpath/DownloadTrailer.log"
+exec &>> "$scriptpath/DownloadTrailer.log"
 
 if [ -f "$scriptpath/cookies.txt" ]; then
 	cookies="--cookies $scriptpath/cookies.txt"
