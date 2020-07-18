@@ -18,6 +18,7 @@ RUN \
 		python3 \
 		python3-pip \
 		ffmpeg \
+		mkvtoolnix \
 		cron && \
 	apt-get purge --auto-remove -y && \
 	apt-get clean && \
