@@ -12,7 +12,7 @@ fi
 
 # import script
 if [ ! -f "/config/scripts/DownloadTrailer.bash" ]; then
-	cp "/root/scripts/DownloadTrailer.bash" "/config/scripts/DownloadTrailer.bash"
+	cp "/scripts/DownloadTrailer.bash" "/config/scripts/DownloadTrailer.bash"
 fi
 
 chmod 0777 -R "/scripts"
