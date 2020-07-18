@@ -51,7 +51,6 @@ if [ -f "$radarrmoviepath/$radarrmoviefolder-trailer.mkv" ]; then
 	mv "$radarrmoviepath/$radarrmoviefolder-trailer.mkv" "$radarrmoviepath/temp.mkv"
 	ffmpeg -y \
 		-i "$radarrmoviepath/temp.mkv" \
-		-i "$radarrmoviepath/$radarrmoviefolder-trailer.jpg" \
 		-c:v copy \
 		-c:a copy \
 		-c:s copy \
