@@ -2,7 +2,7 @@
 apikey="$(grep "<ApiKey>" /config/config.xml | sed "s/\  <ApiKey>//;s/<\/ApiKey>//")"
 RadarrUrl="http://127.0.0.1:7878"
 scriptpath="/config/scripts"
-
+sleep 5
 exec &>> "$scriptpath/MKVTagger.log"
 
 radarrid="$radarr_movie_id"
