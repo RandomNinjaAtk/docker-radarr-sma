@@ -27,6 +27,10 @@ fi
 if [ ${radarrmoviefilename: -4} == ".mkv" ]; then
 	echo "Processing :: $radarrmovietitle :: $radarrmoviefilename"
 	mv "$radarrmoviepath/$radarrmoviefilename" "$radarrmoviepath/temp.mkv"
+	if [ -f "/config/MediaCover/$radarrid/poster.jpg" ]; then
+		cp "/config/MediaCover/$radarrid/poster.jpg" "$radarrmoviepath/cover.jpg"
+		attachcover="-attach \"$radarrmoviepath/cover.jpg\" -metadata:s:t mimetype=image/jpeg"
+	fi
 	ffmpeg -y \
 		-i "$radarrmoviepath/temp.mkv" \
 		-c:v copy \
@@ -40,10 +44,15 @@ if [ ${radarrmoviefilename: -4} == ".mkv" ]; then
 		-metadata COPYRIGHT="$radarrmovieostudio" \
 		-metadata COMMENT="$radarrmovieoverview" \
 		-metadata DIRECTOR="$radarrmoviedirector" \
-		-attach "/config/MediaCover/$radarrid/poster.jpg" -metadata:s:t mimetype=image/jpeg \
+		$attachcover \
 		"$radarrmoviepath/$radarrmoviefilename" &> /dev/null
 	if [ -f "$radarrmoviepath/$radarrmoviefilename" ]; then
-		rm "$radarrmoviepath/temp.mkv"
+		if [ -f "$radarrmoviepath/temp.mkv" ]; then
+			rm "$radarrmoviepath/temp.mkv"
+		fi
+		if [ -f "$radarrmoviepath/cover.jpg" ]; then
+			rm "$radarrmoviepath/cover.jpg"
+		fi
 		echo "Processing :: $radarrmovietitle :: Updating File Statistics"
 		mkvpropedit "$radarrmoviepath/$radarrmoviefilename" --add-track-statistics-tags &> /dev/null
 		echo "Processing :: $radarrmovietitle :: Complete!"
