@@ -29,23 +29,37 @@ if [ ${radarrmoviefilename: -4} == ".mkv" ]; then
 	mv "$radarrmoviepath/$radarrmoviefilename" "$radarrmoviepath/temp.mkv"
 	if [ -f "/config/MediaCover/$radarrid/poster.jpg" ]; then
 		cp "/config/MediaCover/$radarrid/poster.jpg" "$radarrmoviepath/cover.jpg"
-		attachcover="-attach \"$radarrmoviepath/cover.jpg\" -metadata:s:t mimetype=image/jpeg"
-	fi
-	ffmpeg -y \
-		-i "$radarrmoviepath/temp.mkv" \
-		-c:v copy \
-		-c:a copy \
-		-c:s copy \
-		-metadata TITLE="${radarrmovietitle}" \
-		-metadata DATE_RELEASE="$radarrmovieyear" \
-		-metadata DATE="$radarrmovieyear" \
-		-metadata YEAR="$radarrmovieyear" \
-		-metadata GENRE="$radarrmoviegenre" \
-		-metadata COPYRIGHT="$radarrmovieostudio" \
-		-metadata COMMENT="$radarrmovieoverview" \
-		-metadata DIRECTOR="$radarrmoviedirector" \
-		$attachcover \
+		ffmpeg -y \
+			-i "$radarrmoviepath/temp.mkv" \
+			-c:v copy \
+			-c:a copy \
+			-c:s copy \
+			-metadata TITLE="${radarrmovietitle}" \
+			-metadata DATE_RELEASE="$radarrmovieyear" \
+			-metadata DATE="$radarrmovieyear" \
+			-metadata YEAR="$radarrmovieyear" \
+			-metadata GENRE="$radarrmoviegenre" \
+			-metadata COPYRIGHT="$radarrmovieostudio" \
+			-metadata COMMENT="$radarrmovieoverview" \
+			-metadata DIRECTOR="$radarrmoviedirector" \
+			-attach "$radarrmoviepath/cover.jpg" -metadata:s:t mimetype=image/jpeg" \
 		"$radarrmoviepath/$radarrmoviefilename" &> /dev/null
+	else
+		ffmpeg -y \
+			-i "$radarrmoviepath/temp.mkv" \
+			-c:v copy \
+			-c:a copy \
+			-c:s copy \
+			-metadata TITLE="${radarrmovietitle}" \
+			-metadata DATE_RELEASE="$radarrmovieyear" \
+			-metadata DATE="$radarrmovieyear" \
+			-metadata YEAR="$radarrmovieyear" \
+			-metadata GENRE="$radarrmoviegenre" \
+			-metadata COPYRIGHT="$radarrmovieostudio" \
+			-metadata COMMENT="$radarrmovieoverview" \
+			-metadata DIRECTOR="$radarrmoviedirector" \
+		"$radarrmoviepath/$radarrmoviefilename" &> /dev/null
+	fi
 	if [ -f "$radarrmoviepath/$radarrmoviefilename" ]; then
 		if [ -f "$radarrmoviepath/temp.mkv" ]; then
 			rm "$radarrmoviepath/temp.mkv"
