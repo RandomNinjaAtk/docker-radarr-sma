@@ -6,7 +6,7 @@ videoformat="--format bestvideo[vcodec*=avc1]+bestaudio[ext=m4a]"
 YoutubeDL="/usr/local/bin/youtube-dl"
 subtitlelanguage="en"
 scriptpath="/config/scripts"
-
+sleep 5
 exec &>> "$scriptpath/DownloadTrailer.log"
 
 if [ -f "$scriptpath/cookies.txt" ]; then
