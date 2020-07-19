@@ -47,7 +47,7 @@ if [ -f "$radarrmoviepath/$radarrmoviefolder-trailer.mkv" ]; then
 	ffmpeg -y \
 		-i "$radarrmoviepath/$radarrmoviefolder-trailer.mkv" \
 		-vframes 1 -an -s 640x360 -ss 30 \
-		"$radarrmoviepath/$radarrmoviefolder-trailer.jpg" &> /dev/null
+		"$radarrmoviepath/cover.jpg" &> /dev/null
 	mv "$radarrmoviepath/$radarrmoviefolder-trailer.mkv" "$radarrmoviepath/temp.mkv"
 	ffmpeg -y \
 		-i "$radarrmoviepath/temp.mkv" \
@@ -60,11 +60,11 @@ if [ -f "$radarrmoviepath/$radarrmoviefolder-trailer.mkv" ]; then
 		-metadata YEAR="$radarrmovieyear" \
 		-metadata GENRE="$radarrmoviegenre" \
 		-metadata COPYRIGHT="$radarrmovieostudio" \
-		-attach "$radarrmoviepath/$radarrmoviefolder-trailer.jpg" -metadata:s:t mimetype=image/jpeg \
+		-attach "$radarrmoviepath/cover.jpg" -metadata:s:t mimetype=image/jpeg \
 		"$radarrmoviepath/$radarrmoviefolder-trailer.mkv" &> /dev/null
 	rm "$radarrmoviepath/temp.mkv"
-	if [ -f "$radarrmoviepath/$radarrmoviefolder-trailer.jpg" ]; then 
-		rm "$radarrmoviepath/$radarrmoviefolder-trailer.jpg"
+	if [ -f "$radarrmoviepath/cover.jpg" ]; then 
+		rm "$radarrmoviepath/cover.jpg"
 	fi
 	echo "Processing :: $radarrmovietitle :: Updating File Statistics"
 	mkvpropedit "$radarrmoviepath/$radarrmoviefolder-trailer.mkv" --add-track-statistics-tags &> /dev/null
