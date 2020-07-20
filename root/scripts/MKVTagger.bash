@@ -33,9 +33,7 @@ if [ ${radarrmoviefilename: -4} == ".mkv" ]; then
 		cp "/config/MediaCover/$radarrid/poster.jpg" "$radarrmoviepath/cover.jpg"
 		ffmpeg -y \
 			-i "$radarrmoviepath/temp.mkv" \
-			-c:v copy \
-			-c:a copy \
-			-c:s copy \
+			-c copy \
 			-metadata TITLE="${radarrmovietitle}" \
 			-metadata DATE_RELEASE="$radarrmovieyear" \
 			-metadata DATE="$radarrmovieyear" \
@@ -49,9 +47,7 @@ if [ ${radarrmoviefilename: -4} == ".mkv" ]; then
 	else
 		ffmpeg -y \
 			-i "$radarrmoviepath/temp.mkv" \
-			-c:v copy \
-			-c:a copy \
-			-c:s copy \
+			-c copy \
 			-metadata TITLE="${radarrmovietitle}" \
 			-metadata DATE_RELEASE="$radarrmovieyear" \
 			-metadata DATE="$radarrmovieyear" \
