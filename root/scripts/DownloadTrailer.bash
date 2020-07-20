@@ -47,10 +47,15 @@ $python $YoutubeDL ${cookies} -o "$radarrmoviepath/$radarrmoviefolder-trailer" $
 echo "========================STOP YOUTUBE-DL========================="
 if [ -f "$radarrmoviepath/$radarrmoviefolder-trailer.mkv" ]; then   
 	echo "Processing :: $radarrmovietitle :: TRAILER DOWNLOAD :: Complete!"
+	echo "Processing :: $radarrmovietitle :: TRAILER :: Extracting thumbnail with ffmpeg..."
+	echo "========================START FFMPEG========================"
 	ffmpeg -y \
 		-i "$radarrmoviepath/$radarrmoviefolder-trailer.mkv" \
 		-vframes 1 -an -s 640x360 -ss 30 \
-		"$radarrmoviepath/cover.jpg" &> /dev/null
+		"$radarrmoviepath/cover.jpg"
+	echo "========================STOP FFMPEG========================="
+	echo "Processing :: $radarrmovietitle :: TRAILER :: Embedding metadata with ffmpeg..."
+	echo "========================START FFMPEG========================"
 	mv "$radarrmoviepath/$radarrmoviefolder-trailer.mkv" "$radarrmoviepath/temp.mkv"
 	ffmpeg -y \
 		-i "$radarrmoviepath/temp.mkv" \
@@ -64,8 +69,17 @@ if [ -f "$radarrmoviepath/$radarrmoviefolder-trailer.mkv" ]; then
 		-metadata GENRE="$radarrmoviegenre" \
 		-metadata COPYRIGHT="$radarrmovieostudio" \
 		-attach "$radarrmoviepath/cover.jpg" -metadata:s:t mimetype=image/jpeg \
-		"$radarrmoviepath/$radarrmoviefolder-trailer.mkv" &> /dev/null
-	rm "$radarrmoviepath/temp.mkv"
+		"$radarrmoviepath/$radarrmoviefolder-trailer.mkv"
+	echo "========================STOP FFMPEG========================="
+	if [ -f "$radarrmoviepath/$radarrmoviefolder-trailer.mkv" ]; then   
+		echo "Processing :: $radarrmovietitle :: TRAILER :: Metadata Embedding Complete!"
+		if [ -f "$radarrmoviepath/temp.mkv" ]; then   
+			rm "$radarrmoviepath/temp.mkv"
+		fi
+	else
+		echo "Processing :: $radarrmovietitle :: TRAILER :: ERROR: Metadata Embedding Failed!"
+		mv "$radarrmoviepath/temp.mkv" "$radarrmoviepath/$radarrmoviefolder-trailer.mkv"
+	fi
 	if [ -f "$radarrmoviepath/cover.jpg" ]; then 
 		rm "$radarrmoviepath/cover.jpg"
 	fi
