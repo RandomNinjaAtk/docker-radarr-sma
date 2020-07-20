@@ -59,9 +59,7 @@ if [ -f "$radarrmoviepath/$radarrmoviefolder-trailer.mkv" ]; then
 	mv "$radarrmoviepath/$radarrmoviefolder-trailer.mkv" "$radarrmoviepath/temp.mkv"
 	ffmpeg -y \
 		-i "$radarrmoviepath/temp.mkv" \
-		-c:v copy \
-		-c:a copy \
-		-c:s copy \
+		-c copy \
 		-metadata TITLE="${radarrmovietitle}" \
 		-metadata DATE_RELEASE="$radarrmovieyear" \
 		-metadata DATE="$radarrmovieyear" \
