@@ -25,8 +25,10 @@ if [ ! -d "$radarrmoviepath" ]; then
     exit 0
 fi
 if [ ${radarrmoviefilename: -4} == ".mkv" ]; then
-	echo "Processing :: $radarrmovietitle :: $radarrmoviefilename"
+	echo "Processing :: $radarrmovietitle"
+	echo "Processing :: $radarrmovietitle :: Embedding metadata with ffmpeg..."
 	mv "$radarrmoviepath/$radarrmoviefilename" "$radarrmoviepath/temp.mkv"
+	echo "========================START FFMPEG========================"
 	if [ -f "/config/MediaCover/$radarrid/poster.jpg" ]; then
 		cp "/config/MediaCover/$radarrid/poster.jpg" "$radarrmoviepath/cover.jpg"
 		ffmpeg -y \
@@ -43,7 +45,7 @@ if [ ${radarrmoviefilename: -4} == ".mkv" ]; then
 			-metadata COMMENT="$radarrmovieoverview" \
 			-metadata DIRECTOR="$radarrmoviedirector" \
 			-attach "$radarrmoviepath/cover.jpg" -metadata:s:t mimetype=image/jpeg \
-		"$radarrmoviepath/$radarrmoviefilename" &> /dev/null
+			"$radarrmoviepath/$radarrmoviefilename"
 	else
 		ffmpeg -y \
 			-i "$radarrmoviepath/temp.mkv" \
@@ -58,23 +60,25 @@ if [ ${radarrmoviefilename: -4} == ".mkv" ]; then
 			-metadata COPYRIGHT="$radarrmovieostudio" \
 			-metadata COMMENT="$radarrmovieoverview" \
 			-metadata DIRECTOR="$radarrmoviedirector" \
-		"$radarrmoviepath/$radarrmoviefilename" &> /dev/null
+			"$radarrmoviepath/$radarrmoviefilename"
 	fi
+	echo "========================STOP FFMPEG========================="
 	if [ -f "$radarrmoviepath/$radarrmoviefilename" ]; then
-		if [ -f "$radarrmoviepath/temp.mkv" ]; then
-			rm "$radarrmoviepath/temp.mkv"
-		fi
-		if [ -f "$radarrmoviepath/cover.jpg" ]; then
-			rm "$radarrmoviepath/cover.jpg"
-		fi
-		echo "Processing :: $radarrmovietitle :: Updating File Statistics via mkvtoolnix (mkvpropedit)..."
-		echo "========================START MKVPROPEDIT========================"
-		mkvpropedit "$radarrmoviepath/$radarrmoviefilename" --add-track-statistics-tags
-		echo "========================STOP MKVPROPEDIT========================="		
-		echo "Processing :: $radarrmovietitle :: Complete!"
+		echo "Processing :: $radarrmovietitle :: Metadata Embedding Complete!"
 	else
-		echo "Processing :: $radarrmovietitle :: Failed!"
+		echo "Processing :: $radarrmovietitle :: ERROR :: Metadata Embedding Failed!"
 		mv "$radarrmoviepath/temp.mkv" "$radarrmoviepath/$radarrmoviefilename"
 	fi
+	if [ -f "$radarrmoviepath/temp.mkv" ]; then
+		rm "$radarrmoviepath/temp.mkv"
+	fi
+	if [ -f "$radarrmoviepath/cover.jpg" ]; then
+		rm "$radarrmoviepath/cover.jpg"
+	fi
+	echo "Processing :: $radarrmovietitle :: Updating File Statistics via mkvtoolnix (mkvpropedit)..."
+	echo "========================START MKVPROPEDIT========================"
+	mkvpropedit "$radarrmoviepath/$radarrmoviefilename" --add-track-statistics-tags
+	echo "========================STOP MKVPROPEDIT========================="
+	echo "Processing :: $radarrmovietitle :: Complete!"
 fi
 exit 0
