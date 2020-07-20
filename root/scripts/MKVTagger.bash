@@ -42,7 +42,7 @@ if [ ${radarrmoviefilename: -4} == ".mkv" ]; then
 			-metadata COPYRIGHT="$radarrmovieostudio" \
 			-metadata COMMENT="$radarrmovieoverview" \
 			-metadata DIRECTOR="$radarrmoviedirector" \
-			-attach "$radarrmoviepath/cover.jpg" -metadata:s:t mimetype=image/jpeg" \
+			-attach "$radarrmoviepath/cover.jpg" -metadata:s:t mimetype=image/jpeg \
 		"$radarrmoviepath/$radarrmoviefilename" &> /dev/null
 	else
 		ffmpeg -y \
