@@ -41,7 +41,10 @@ if [ -f "$radarrmoviepath/$radarrmoviefolder-trailer.mkv" ]; then
     echo "$radarrmovietitle :: Trailer already Downloaded..."
     exit 0
 fi
-$python $YoutubeDL ${cookies} -o "$radarrmoviepath/$radarrmoviefolder-trailer" ${videoformat} --write-sub --sub-lang $subtitlelanguage --embed-subs --merge-output-format mkv --no-mtime --geo-bypass "$youtubeurl" &> /dev/null
+echo "Processing :: $radarrmovietitle :: DOWNLOAD :: Sending to youtube-dl"
+echo "========================START YOUTUBE-DL========================"
+$python $YoutubeDL ${cookies} -o "$radarrmoviepath/$radarrmoviefolder-trailer" ${videoformat} --write-sub --sub-lang $subtitlelanguage --embed-subs --merge-output-format mkv --no-mtime --geo-bypass "$youtubeurl"
+echo "========================STOP YOUTUBE-DL========================="
 if [ -f "$radarrmoviepath/$radarrmoviefolder-trailer.mkv" ]; then   
 	echo "Processing :: $radarrmovietitle :: TRAILER DOWNLOAD :: Complete!"
 	ffmpeg -y \
@@ -71,6 +74,9 @@ if [ -f "$radarrmoviepath/$radarrmoviefolder-trailer.mkv" ]; then
 	if [ -f "$radarrmoviepath/$radarrmoviefolder-trailer.mp4" ]; then
 		rm "$radarrmoviepath/$radarrmoviefolder-trailer.mp4"
 	fi
+	echo "Processing :: $radarrmovietitle :: Complete!"
+else
+	echo "Processing :: $radarrmovietitle :: TRAILER DOWNLOAD :: ERROR :: Skipping..."
 fi
-echo "Processing :: $radarrmovietitle :: Complete!"
+
 exit 0
