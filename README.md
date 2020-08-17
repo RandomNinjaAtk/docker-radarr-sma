@@ -1,4 +1,8 @@
 # [RandomNinjaAtk/radarr-sma](https://github.com/RandomNinjaAtk/docker-radarr-sma)
+![Docker Build](https://img.shields.io/docker/cloud/automated/randomninjaatk/radarr-sma?style=flat-square)
+![Docker Pulls](https://img.shields.io/docker/pulls/randomninjaatk/radarr-sma?style=flat-square)
+![Docker Stars](https://img.shields.io/docker/stars/randomninjaatk/radarr-sma?style=flat-square)
+[![Docker Hub](https://img.shields.io/badge/Open%20On-DockerHub-blue)](https://hub.docker.com/r/randomninjaatk/radarr-sma)
 
 [Radarr](https://github.com/Radarr/Radarr) - A fork of Sonarr to work with movies à la Couchpotato.
 
