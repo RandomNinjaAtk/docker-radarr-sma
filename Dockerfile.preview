@@ -1,4 +1,4 @@
-FROM linuxserver/radarr:preview
+FROM linuxserver/radarr:nightly
 LABEL maintainer="RandomNinjaAtk"
 
 ENV SMA_PATH /usr/local/sma
@@ -35,15 +35,13 @@ RUN \
 	chmod g+w ${SMA_PATH}/config/sma.log && \
 	echo "************ install pip dependencies ************" && \
 	python3 -m pip install --user --upgrade pip && \	
-	pip3 install -r ${SMA_PATH}/setup/requirements.txt && \
-	echo "************ setup cron ************" && \
-	service cron start && \
-	echo "* * * * *   root   bash /scripts/update.bash" >> "/etc/crontab"
+	pip3 install -r ${SMA_PATH}/setup/requirements.txt
 	
-WORKDIR /
-
 # copy local files
 COPY root/ /
+
+# set working dir
+WORKDIR /config
 
 # ports and volumes
 EXPOSE 7878
