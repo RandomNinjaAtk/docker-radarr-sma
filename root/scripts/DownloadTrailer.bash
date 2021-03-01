@@ -19,148 +19,144 @@ if [ $radarr_eventtype == "Test" ]; then
 	exit 0	
 fi
 
-Configuration () {
-	echo "### SCRIPT VERSION 0.1"
-	echo "### DOCKER VERSION $VERSION"
-	echo "### CONFIGURATION VERIFICATION"
-	error=0
+echo "### SCRIPT VERSION 0.1"
+echo "### DOCKER VERSION $VERSION"
+echo "### CONFIGURATION VERIFICATION"
+error=0
 	
-	#Verify Radarr Connectivity using v0.2 and v3 API url
-	radarrtestv02=$(curl -s "$RadarrUrl/api/system/status?apikey=${RadarrAPIkey}" | jq -r ".version")
-	radarrtestv3=$(curl -s "$RadarrUrl/api/v3/system/status?apikey=${RadarrAPIkey}" | jq -r ".version")
-	if [ ! -z "$radarrtestv02" ] || [ ! -z "$radarrtestv3" ] ; then
-		if [ "$radarrtestv02" != "null" ]; then
-			echo "Radarr v0.2 API: Connection Valid, version: $radarrtestv02"
-		elif [ "$radarrtestv3" != "null" ]; then
-			echo "Radarr v3 API: Connection Valid, version: $radarrtestv3"
-		else
-			echo "ERROR: Cannot communicate with Radarr, most likely a...."
-			echo "ERROR: Invalid API Key: $RadarrAPIkey"
-			error=1
-		fi
+#Verify Radarr Connectivity using v0.2 and v3 API url
+radarrtestv02=$(curl -s "$RadarrUrl/api/system/status?apikey=${RadarrAPIkey}" | jq -r ".version")
+radarrtestv3=$(curl -s "$RadarrUrl/api/v3/system/status?apikey=${RadarrAPIkey}" | jq -r ".version")
+if [ ! -z "$radarrtestv02" ] || [ ! -z "$radarrtestv3" ] ; then
+	if [ "$radarrtestv02" != "null" ]; then
+		echo "Radarr v0.2 API: Connection Valid, version: $radarrtestv02"
+	elif [ "$radarrtestv3" != "null" ]; then
+		echo "Radarr v3 API: Connection Valid, version: $radarrtestv3"
 	else
-		echo "ERROR: Cannot communicate with Radarr, no response"
-		echo "ERROR: URL: $RadarrUrl"
-		echo "ERROR: API Key: $RadarrAPIkey"
+		echo "ERROR: Cannot communicate with Radarr, most likely a...."
+		echo "ERROR: Invalid API Key: $RadarrAPIkey"
 		error=1
 	fi
+else
+	echo "ERROR: Cannot communicate with Radarr, no response"
+	echo "ERROR: URL: $RadarrUrl"
+	echo "ERROR: API Key: $RadarrAPIkey"
+	error=1
+fi
+radarrmovielist=$(curl -s --header "X-Api-Key:"${RadarrAPIkey} --request GET  "$RadarrUrl/api/movie")
+radarrmovietotal=$(echo "${radarrmovielist}"  | jq -r '.[] | select(.hasFile==true) | .id' | wc -l)
+radarrmovieids=($(echo "${radarrmovielist}" | jq -r '.[] | select(.hasFile==true) | .id'))
+	
+echo "Radarr: Verifying Movie Directory Access:"
+for id in ${!radarrmovieids[@]}; do
+	currentprocessid=$(( $id + 1 ))
+	radarrid="${radarrmovieids[$id]}"
+	radarrmoviedata="$(echo "${radarrmovielist}" | jq -r ".[] | select(.id==$radarrid)")"
+	radarrmoviepath="$(echo "${radarrmoviedata}" | jq -r ".path")"
+	radarrmovierootpath="$(dirname "$radarrmoviepath")"
+	if [ -d "$radarrmovierootpath" ]; then
+		echo "Radarr: Root Media Folder Found: $radarrmovierootpath"
+		error=0
+		break
+	else
+		echo "ERROR: Radarr Root Media Folder not found, please verify you have the right volume configured, expecting path:"
+		echo "ERROR: Expected volume path: $radarrmovierootpath"
+		error=1
+		break
+	fi
+done
 
-	radarrmovielist=$(curl -s --header "X-Api-Key:"${RadarrAPIkey} --request GET  "$RadarrUrl/api/movie")
-	radarrmovietotal=$(echo "${radarrmovielist}"  | jq -r '.[] | select(.hasFile==true) | .id' | wc -l)
-	radarrmovieids=($(echo "${radarrmovielist}" | jq -r '.[] | select(.hasFile==true) | .id'))
-	
-	echo "Radarr: Verifying Movie Directory Access:"
-	for id in ${!radarrmovieids[@]}; do
-		currentprocessid=$(( $id + 1 ))
-		radarrid="${radarrmovieids[$id]}"
-		radarrmoviedata="$(echo "${radarrmovielist}" | jq -r ".[] | select(.id==$radarrid)")"
-		radarrmoviepath="$(echo "${radarrmoviedata}" | jq -r ".path")"
-		radarrmovierootpath="$(dirname "$radarrmoviepath")"
-		if [ -d "$radarrmovierootpath" ]; then
-			echo "Radarr: Root Media Folder Found: $radarrmovierootpath"
-			error=0
-			break
-		else
-			echo "ERROR: Radarr Root Media Folder not found, please verify you have the right volume configured, expecting path:"
-			echo "ERROR: Expected volume path: $radarrmovierootpath"
-			error=1
-			break
-		fi
-	done
+echo "youtube-dl: Checking for cookies.txt"
+if [ -f "/config/scripts/cookies.txt" ]; then
+	echo "youtube-dl: /config/scripts/cookies.txt found!"
+	cookies="--cookies /config/scripts/cookies.txt"
+else
+	echo "WARNING: youtube-dl cookies.txt not found at the following location: /config/scripts/cookies.txt"
+	echo "WARNING: not having cookies may result in failed downloads..."
+	cookies=""
+fi
 
-	echo "youtube-dl: Checking for cookies.txt"
-	if [ -f "/config/scripts/cookies.txt" ]; then
-		echo "youtube-dl: /config/scripts/cookies.txt found!"
-		cookies="--cookies /config/scripts/cookies.txt"
-	else
-		echo "WARNING: youtube-dl cookies.txt not found at the following location: /config/scripts/cookies.txt"
-		echo "WARNING: not having cookies may result in failed downloads..."
-		cookies=""
-	fi
+# extrastype
+if [ ! -z "$extrastype" ]; then
+	echo "Radarr Extras Selection: $extrastype"
+else
+	echo "WARNING: Radarr Extras Selection not specified"
+	echo "Radarr Extras Selection: trailers"
+	extrastype="trailers"
+fi
 
-	# extrastype
-	if [ ! -z "$extrastype" ]; then
-		echo "Radarr Extras Selection: $extrastype"
-	else
-		echo "WARNING: Radarr Extras Selection not specified"
-		echo "Radarr Extras Selection: trailers"
-		extrastype="trailers"
-	fi
-	
-	# LANGUAGES
-	if [ ! -z "$LANGUAGES" ]; then
-		LANGUAGES="${LANGUAGES,,}"
-		echo "Radarr Extras Audio Languages: $LANGUAGES (first one found is used)"
-	else
-		LANGUAGES="en"
-		echo "Radarr Extras Audio Languages: $LANGUAGES (first one found is used)"
-	fi
-	
-	# videoformat
-	if [ ! -z "$videoformat" ]; then
-		echo "Radarr Extras Format Set To: $videoformat"
-	else
-		echo "Radarr Extras Format Set To: --format bestvideo[vcodec*=avc1]+bestaudio"
-		videoformat="--format bestvideo[vcodec*=avc1]+bestaudio"
-	fi
+# LANGUAGES
+if [ ! -z "$LANGUAGES" ]; then
+	LANGUAGES="${LANGUAGES,,}"
+	echo "Radarr Extras Audio Languages: $LANGUAGES (first one found is used)"
+else
+	LANGUAGES="en"
+	echo "Radarr Extras Audio Languages: $LANGUAGES (first one found is used)"
+fi
+
+# videoformat
+if [ ! -z "$videoformat" ]; then
+	echo "Radarr Extras Format Set To: $videoformat"
+else
+	echo "Radarr Extras Format Set To: --format bestvideo[vcodec*=avc1]+bestaudio"
+	videoformat="--format bestvideo[vcodec*=avc1]+bestaudio"
+fi
 	
 
-	# subtitlelanguage
-	if [ ! -z "$subtitlelanguage" ]; then
-		subtitlelanguage="${subtitlelanguage,,}"
-		echo "Radarr Extras Subtitle Language: $subtitlelanguage"
-	else
-		subtitlelanguage="en"
-		echo "Radarr Extras Subtitle Language: $subtitlelanguage"
-	fi
+# subtitlelanguage
+if [ ! -z "$subtitlelanguage" ]; then
+	subtitlelanguage="${subtitlelanguage,,}"
+	echo "Radarr Extras Subtitle Language: $subtitlelanguage"
+else
+	subtitlelanguage="en"
+	echo "Radarr Extras Subtitle Language: $subtitlelanguage"
+fi
 
-	if [ ! -z "$FilePermissions" ]; then
-		echo "Radarr Extras File Permissions: $FilePermissions"
-	else
-		echo "ERROR: FilePermissions not set, using default..."
-		FilePermissions="666"
-		echo "Radarr Extras File Permissions: $FilePermissions"
-	fi
+if [ ! -z "$FilePermissions" ]; then
+	echo "Radarr Extras File Permissions: $FilePermissions"
+else
+	echo "ERROR: FilePermissions not set, using default..."
+	FilePermissions="666"
+	echo "Radarr Extras File Permissions: $FilePermissions"
+fi
 	
-	if [ ! -z "$FolderPermissions" ]; then
-		echo "Radarr Extras Foldder Permissions: $FolderPermissions"
-	else
-		echo "WARNING: FolderPermissions not set, using default..."
-		FolderPermissions="766"
-		echo "Radarr Extras Foldder Permissions: $FolderPermissions"
-	fi
+if [ ! -z "$FolderPermissions" ]; then
+	echo "Radarr Extras Foldder Permissions: $FolderPermissions"
+else
+	echo "WARNING: FolderPermissions not set, using default..."
+	FolderPermissions="766"
+	echo "Radarr Extras Foldder Permissions: $FolderPermissions"
+fi
 	
-	if [ ! -z "$SINGLETRAILER" ]; then
-		if [ "$SINGLETRAILER" == "true" ]; then
-			echo "Radarr Single Trailer: ENABLED"
-		else
-			echo "Radarr Single Trailer: DISABLED"
-		fi
-	else
-		echo "WARNING: SINGLETRAILER not set, using default..."
-		SINGLETRAILER="true"
+if [ ! -z "$SINGLETRAILER" ]; then
+	if [ "$SINGLETRAILER" == "true" ]; then
 		echo "Radarr Single Trailer: ENABLED"
-	fi
-	
-	if [ ! -z "$USEFOLDERS" ]; then
-		if [ "$USEFOLDERS" == "true" ]; then
-			echo "Radarr Use Extras Folders: ENABLED"
-		else
-			echo "Radarr Use Extras Folders: DISABLED"
-		fi
 	else
-		echo "WARNING: USEFOLDERS not set, using default..."
-		USEFOLDERS="false"
+		echo "Radarr Single Trailer: DISABLED"
+	fi
+else
+	echo "WARNING: SINGLETRAILER not set, using default..."
+	SINGLETRAILER="true"
+	echo "Radarr Single Trailer: ENABLED"
+fi
+	
+if [ ! -z "$USEFOLDERS" ]; then
+	if [ "$USEFOLDERS" == "true" ]; then
+		echo "Radarr Use Extras Folders: ENABLED"
+	else
 		echo "Radarr Use Extras Folders: DISABLED"
 	fi
+else
+	echo "WARNING: USEFOLDERS not set, using default..."
+	USEFOLDERS="false"
+	echo "Radarr Use Extras Folders: DISABLED"
+fi
 
-	if [ $error == 1 ]; then
-		echo "ERROR :: Exiting..."
-		exit 1
-	fi
-}
+if [ $error == 1 ]; then
+	echo "ERROR :: Exiting..."
+	exit 1
+fi
 
-Configuration
 
 radarrid="$radarr_movie_id"
 radarrmoviedata="$(curl -s --header "X-Api-Key:"${RadarrAPIkey} --request GET  "$RadarrUrl/api/movie/$radarrid")"
@@ -283,81 +279,81 @@ for id in ${!themoviedbvideoslistids[@]}; do
 		folder="Other"
 	fi				
 			
-			echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: $currentsubprocessid of $themoviedbvideoslistidscount :: $folder :: $themoviedbvidename"
+	echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: $currentsubprocessid of $themoviedbvideoslistidscount :: $folder :: $themoviedbvidename"
 			
-			if [ "$USEFOLDERS" == "true" ]; then
-				if [ "$SINGLETRAILER" == "true" ]; then
-					if [ "$themoviedbvidetype" == "Trailer" ]; then
-						if find "$radarrmoviepath/$folder" -name "*.mkv" | read; then
-							echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: $currentsubprocessid of $themoviedbvideoslistidscount :: $folder :: $themoviedbvidename :: Existing Trailer found, skipping..."
-							continue
-						fi
-					fi
+	if [ "$USEFOLDERS" == "true" ]; then
+		if [ "$SINGLETRAILER" == "true" ]; then
+			if [ "$themoviedbvidetype" == "Trailer" ]; then
+				if find "$radarrmoviepath/$folder" -name "*.mkv" | read; then
+					echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: $currentsubprocessid of $themoviedbvideoslistidscount :: $folder :: $themoviedbvidename :: Existing Trailer found, skipping..."
+					continue
 				fi
-				outputfile="$radarrmoviepath/$folder/$sanatizethemoviedbvidename.mkv"
-			else
-				if [[ -d "$radarrmoviepath/${folder}s" || -d "$radarrmoviepath/${folder}" ]]; then
-					if [ "$themoviedbvidetype" == "Behind the Scenes" ]; then
-						rm -rf "$radarrmoviepath/${folder}"
-					else
-						rm -rf "$radarrmoviepath/${folder}s"
-					fi
-				fi
-				folder="$(echo "${folder,,}" | sed 's/ *//g')"
-				if [ "$SINGLETRAILER" == "true" ]; then
-					if [ "$themoviedbvidetype" == "Trailer" ]; then
-						if find "$radarrmoviepath" -name "*-trailer.mkv" | read; then
-							echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: $currentsubprocessid of $themoviedbvideoslistidscount :: $folder :: $themoviedbvidename :: Existing Trailer found, skipping..."
-							continue
-						fi
-					fi
-				fi
-				outputfile="$radarrmoviepath/$sanatizethemoviedbvidename-$folder.mkv"
-			fi			
-			
-			if [ -f "$outputfile" ]; then
-				echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: $currentsubprocessid of $themoviedbvideoslistidscount :: $folder :: $themoviedbvidename :: Trailer already Downloaded..."
-				continue
 			fi
-			
-			if [ ! -d "/config/temp" ]; then
-				mkdir -p /config/temp
+		fi
+		outputfile="$radarrmoviepath/$folder/$sanatizethemoviedbvidename.mkv"
+	else
+		if [[ -d "$radarrmoviepath/${folder}s" || -d "$radarrmoviepath/${folder}" ]]; then
+			if [ "$themoviedbvidetype" == "Behind the Scenes" ]; then
+				rm -rf "$radarrmoviepath/${folder}"
 			else
-				rm -rf /config/temp
-				mkdir -p /config/temp
+				rm -rf "$radarrmoviepath/${folder}s"
 			fi
-			tempfile="/config/temp/download"
-
-			echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: $currentsubprocessid of $themoviedbvideoslistidscount :: $folder :: $themoviedbvidename :: Sending Trailer link to youtube-dl..."
-			echo "=======================START YOUTUBE-DL========================="
-			python3 $YoutubeDL ${cookies} -o "$tempfile" ${videoformat} --write-sub --sub-lang $subtitlelanguage --embed-subs --merge-output-format mkv --no-mtime --geo-bypass "$youtubeurl"
-			echo "========================STOP YOUTUBE-DL========================="
-			if [ -f "$tempfile.mkv" ]; then
-				audiochannels="$(ffprobe -v quiet -print_format json -show_streams "$tempfile.mkv" | jq -r ".[] | .[] | select(.codec_type==\"audio\") | .channels")"
-				width="$(ffprobe -v quiet -print_format json -show_streams "$tempfile.mkv" | jq -r ".[] | .[] | select(.codec_type==\"video\") | .width")"
-				height="$(ffprobe -v quiet -print_format json -show_streams "$tempfile.mkv" | jq -r ".[] | .[] | select(.codec_type==\"video\") | .height")"
-				if [[ "$width" -ge "3800" || "$height" -ge "2100" ]]; then
-					videoquality=3
-					qualitydescription="UHD"
-				elif [[ "$width" -ge "1900" || "$height" -ge "1060" ]]; then
-					videoquality=2
-					qualitydescription="FHD"
-				elif [[ "$width" -ge "1260" || "$height" -ge "700" ]]; then
-					videoquality=1
-					qualitydescription="HD"
-				else
-					videoquality=0
-					qualitydescription="SD"
+		fi
+		folder="$(echo "${folder,,}" | sed 's/ *//g')"
+		if [ "$SINGLETRAILER" == "true" ]; then
+			if [ "$themoviedbvidetype" == "Trailer" ]; then
+				if find "$radarrmoviepath" -name "*-trailer.mkv" | read; then
+					echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: $currentsubprocessid of $themoviedbvideoslistidscount :: $folder :: $themoviedbvidename :: Existing Trailer found, skipping..."
+					continue
 				fi
+			fi
+		fi
+		outputfile="$radarrmoviepath/$sanatizethemoviedbvidename-$folder.mkv"
+	fi			
+			
+	if [ -f "$outputfile" ]; then
+		echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: $currentsubprocessid of $themoviedbvideoslistidscount :: $folder :: $themoviedbvidename :: Trailer already Downloaded..."
+		continue
+	fi
+			
+	if [ ! -d "/config/temp" ]; then
+		mkdir -p /config/temp
+	else
+		rm -rf /config/temp
+		mkdir -p /config/temp
+	fi
+	tempfile="/config/temp/download"
 
-				if [ "$audiochannels" -ge "3" ]; then
-					channelcount=$(( $audiochannels - 1 ))
-					audiodescription="${audiochannels}.1 Channel"
-				elif [ "$audiochannels" == "2" ]; then
-					audiodescription="Stereo"
-				elif [ "$audiochannels" == "1" ]; then
-					audiodescription="Mono"
-				fi
+	echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: $currentsubprocessid of $themoviedbvideoslistidscount :: $folder :: $themoviedbvidename :: Sending Trailer link to youtube-dl..."
+	echo "=======================START YOUTUBE-DL========================="
+	python3 $YoutubeDL ${cookies} -o "$tempfile" ${videoformat} --write-sub --sub-lang $subtitlelanguage --embed-subs --merge-output-format mkv --no-mtime --geo-bypass "$youtubeurl"
+	echo "========================STOP YOUTUBE-DL========================="
+	if [ -f "$tempfile.mkv" ]; then
+		audiochannels="$(ffprobe -v quiet -print_format json -show_streams "$tempfile.mkv" | jq -r ".[] | .[] | select(.codec_type==\"audio\") | .channels")"
+		width="$(ffprobe -v quiet -print_format json -show_streams "$tempfile.mkv" | jq -r ".[] | .[] | select(.codec_type==\"video\") | .width")"
+		height="$(ffprobe -v quiet -print_format json -show_streams "$tempfile.mkv" | jq -r ".[] | .[] | select(.codec_type==\"video\") | .height")"
+		if [[ "$width" -ge "3800" || "$height" -ge "2100" ]]; then
+			videoquality=3
+			qualitydescription="UHD"
+		elif [[ "$width" -ge "1900" || "$height" -ge "1060" ]]; then
+			videoquality=2
+			qualitydescription="FHD"
+		elif [[ "$width" -ge "1260" || "$height" -ge "700" ]]; then
+			videoquality=1
+			qualitydescription="HD"
+		else
+			videoquality=0
+			qualitydescription="SD"
+		fi
+
+		if [ "$audiochannels" -ge "3" ]; then
+			channelcount=$(( $audiochannels - 1 ))
+			audiodescription="${audiochannels}.1 Channel"
+		elif [ "$audiochannels" == "2" ]; then
+			audiodescription="Stereo"
+		elif [ "$audiochannels" == "1" ]; then
+			audiodescription="Mono"
+		fi
 
 		echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: $currentsubprocessid of $themoviedbvideoslistidscount :: $folder :: $themoviedbvidename :: TRAILER DOWNLOAD :: Complete!"
 		echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: $currentsubprocessid of $themoviedbvideoslistidscount :: $folder :: $themoviedbvidename :: TRAILER :: Extracting thumbnail with ffmpeg..."
