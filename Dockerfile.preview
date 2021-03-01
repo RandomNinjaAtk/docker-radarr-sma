@@ -15,8 +15,7 @@ RUN \
 		python3 \
 		python3-pip \
 		ffmpeg \
-		mkvtoolnix \
-		cron && \
+		mkvtoolnix && \
 	apt-get purge --auto-remove -y && \
 	apt-get clean && \
 	echo "************ install youtube-dl ************" && \
