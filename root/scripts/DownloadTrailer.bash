@@ -69,11 +69,11 @@ Configuration () {
 	done
 
 	echo "youtube-dl: Checking for cookies.txt"
-	if [ -f "/config/cookies.txt" ]; then
-		echo "youtube-dl: /config/cookies.txt found!"
-		cookies="--cookies /config/cookies.txt"
+	if [ -f "/config/scripts/cookies.txt" ]; then
+		echo "youtube-dl: /config/scripts/cookies.txt found!"
+		cookies="--cookies /config/scripts/cookies.txt"
 	else
-		echo "WARNING: youtube-dl cookies.txt not found at the following location: /config/cookies.txt"
+		echo "WARNING: youtube-dl cookies.txt not found at the following location: /config/scripts/cookies.txt"
 		echo "WARNING: not having cookies may result in failed downloads..."
 		cookies=""
 	fi
