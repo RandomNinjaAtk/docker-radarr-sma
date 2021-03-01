@@ -243,45 +243,45 @@ fi
 echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: $themoviedbvideoslistidscount Extras Found!"
 for id in ${!themoviedbvideoslistids[@]}; do
 	currentsubprocessid=$(( $id + 1 ))
-			themoviedbvideoid="${themoviedbvideoslistids[$id]}"
-			themoviedbvideodata="$(echo "$themoviedbvideoslistdata" | jq -r ".results[] | select(.id==\"$themoviedbvideoid\") | .")"
-			themoviedbvidelanguage="$(echo "$themoviedbvideodata" | jq -r ".iso_639_1")"
-			themoviedbvidecountry="$(echo "$themoviedbvideodata" | jq -r ".iso_3166_1")"
-			themoviedbvidekey="$(echo "$themoviedbvideodata" | jq -r ".key")"
-			themoviedbvidename="$(echo "$themoviedbvideodata" | jq -r ".name")"
-			themoviedbvidetype="$(echo "$themoviedbvideodata" | jq -r ".type")"
-			youtubeurl="https://www.youtube.com/watch?v=$themoviedbvidekey"
-			sanatizethemoviedbvidename="$(echo "${themoviedbvidename}" | sed -e 's/[\\/:\*\?"<>\|\x01-\x1F\x7F]//g'  -e "s/  */ /g")"
+	themoviedbvideoid="${themoviedbvideoslistids[$id]}"
+	themoviedbvideodata="$(echo "$themoviedbvideoslistdata" | jq -r ".results[] | select(.id==\"$themoviedbvideoid\") | .")"
+	themoviedbvidelanguage="$(echo "$themoviedbvideodata" | jq -r ".iso_639_1")"
+	themoviedbvidecountry="$(echo "$themoviedbvideodata" | jq -r ".iso_3166_1")"
+	themoviedbvidekey="$(echo "$themoviedbvideodata" | jq -r ".key")"
+	themoviedbvidename="$(echo "$themoviedbvideodata" | jq -r ".name")"
+	themoviedbvidetype="$(echo "$themoviedbvideodata" | jq -r ".type")"
+	youtubeurl="https://www.youtube.com/watch?v=$themoviedbvidekey"
+	sanatizethemoviedbvidename="$(echo "${themoviedbvidename}" | sed -e 's/[\\/:\*\?"<>\|\x01-\x1F\x7F]//g'  -e "s/  */ /g")"
 								
-			if [ "$themoviedbvidetype" == "Featurette" ]; then
-				if [ "$USEFOLDERS" == "true" ]; then
-					folder="Featurettes"
-				else
-					folder="Featurette"
-				fi
-			elif [ "$themoviedbvidetype" == "Trailer" ]; then
-				if [ "$USEFOLDERS" == "true" ]; then
-					folder="Trailers"
-				else
-					folder="Trailer"
-				fi
-			elif [ "$themoviedbvidetype" == "Behind the Scenes" ]; then
-				folder="Behind The Scenes"
-			elif [ "$themoviedbvidetype" == "Clip" ]; then
-				if [ "$USEFOLDERS" == "true" ]; then
-					folder="Scenes"
-				else
-					folder="Scene"
-				fi
-			elif [ "$themoviedbvidetype" == "Bloopers" ]; then
-				if [ "$USEFOLDERS" == "true" ]; then
-					folder="Shorts"
-				else
-					folder="Short"
-				fi
-			elif [ "$themoviedbvidetype" == "Teaser" ]; then
-				folder="Other"
-			fi				
+	if [ "$themoviedbvidetype" == "Featurette" ]; then
+		if [ "$USEFOLDERS" == "true" ]; then
+			folder="Featurettes"
+		else
+			folder="Featurette"
+		fi
+	elif [ "$themoviedbvidetype" == "Trailer" ]; then
+		if [ "$USEFOLDERS" == "true" ]; then
+			folder="Trailers"
+		else
+			folder="Trailer"
+		fi
+	elif [ "$themoviedbvidetype" == "Behind the Scenes" ]; then
+		folder="Behind The Scenes"
+	elif [ "$themoviedbvidetype" == "Clip" ]; then
+		if [ "$USEFOLDERS" == "true" ]; then
+			folder="Scenes"
+		else
+			folder="Scene"
+		fi
+	elif [ "$themoviedbvidetype" == "Bloopers" ]; then
+		if [ "$USEFOLDERS" == "true" ]; then
+			folder="Shorts"
+		else
+			folder="Short"
+		fi
+	elif [ "$themoviedbvidetype" == "Teaser" ]; then
+		folder="Other"
+	fi				
 			
 			echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: $currentsubprocessid of $themoviedbvideoslistidscount :: $folder :: $themoviedbvidename"
 			
@@ -359,80 +359,81 @@ for id in ${!themoviedbvideoslistids[@]}; do
 					audiodescription="Mono"
 				fi
 
-				echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: $currentsubprocessid of $themoviedbvideoslistidscount :: $folder :: $themoviedbvidename :: TRAILER DOWNLOAD :: Complete!"
-				echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: $currentsubprocessid of $themoviedbvideoslistidscount :: $folder :: $themoviedbvidename :: TRAILER :: Extracting thumbnail with ffmpeg..."
-				echo "========================START FFMPEG========================"
-				ffmpeg -y \
-					-ss 10 \
-					-i "$tempfile.mkv" \
-					-frames:v 1 \
-					-vf "scale=640:-2" \
-					"/config/temp/cover.jpg"
-				echo "========================STOP FFMPEG========================="
-				echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: $currentsubprocessid of $themoviedbvideoslistidscount :: $folder :: $themoviedbvidename :: Updating File Statistics via mkvtoolnix (mkvpropedit)..."
-				echo "========================START MKVPROPEDIT========================"
-				mkvpropedit "$tempfile.mkv" --add-track-statistics-tags
-				echo "========================STOP MKVPROPEDIT========================="
-				echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: $currentsubprocessid of $themoviedbvideoslistidscount :: $folder :: $themoviedbvidename :: TRAILER :: Embedding metadata with ffmpeg..."
-				echo "========================START FFMPEG========================"
-				mv "$tempfile.mkv" "$tempfile-temp.mkv"
-				ffmpeg -y \
-					-i "$tempfile-temp.mkv" \
-					-c copy \
-					-metadata TITLE="${themoviedbvidename}" \
-					-metadata DATE_RELEASE="$radarrmovieyear" \
-					-metadata GENRE="$radarrmoviegenre" \
-					-metadata COPYRIGHT="$radarrmovieostudio" \
-					-metadata ENCODED_BY="AMTD" \
-					-metadata CONTENT_TYPE="Movie $folder" \
-					-metadata:s:v:0 title="$qualitydescription" \
-					-metadata:s:a:0 title="$audiodescription" \
-					-attach "/config/temp/cover.jpg" -metadata:s:t mimetype=image/jpeg \
-					"$tempfile.mkv"
-				echo "========================STOP FFMPEG========================="
-				if [ -f "$tempfile.mkv" ]; then
-					echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: $currentsubprocessid of $themoviedbvideoslistidscount :: $folder :: $themoviedbvidename :: TRAILER :: Metadata Embedding Complete!"
-					if [ -f "$tempfile-temp.mkv" ]; then
-						rm "$tempfile-temp.mkv"
-					fi
-				else
-					echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: $currentsubprocessid of $themoviedbvideoslistidscount :: $folder :: $themoviedbvidename :: TRAILER :: ERROR: Metadata Embedding Failed!"
-					mv "$tempfile-temp.mkv" "$tempfile.mkv"
-				fi
-				
-				if [ -f "$tempfile.mkv" ]; then
-					if [ "$USEFOLDERS" == "false" ]; then
-						mv "$tempfile.mkv" "$outputfile"
-						chmod $FilePermissions "$outputfile"
-						chown abc:abc "$outputfile"
-					else
-						if [ ! -d "$radarrmoviepath/$folder" ]; then
-							mkdir -p "$radarrmoviepath/$folder"
-							chmod $FolderPermissions "$radarrmoviepath/$folder"
-							chown abc:abc "$radarrmoviepath/$folder"
-						fi
-						if [ -d "$radarrmoviepath/$folder" ]; then
-							mv "$tempfile.mkv" "$outputfile"
-							chmod $FilePermissions "$outputfile"
-							chown abc:abc "$outputfile"
-						fi
-					fi
-				fi
-				echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: $currentsubprocessid of $themoviedbvideoslistidscount :: $folder :: $themoviedbvidename :: Complete!"
-			else
-				echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: $currentsubprocessid of $themoviedbvideoslistidscount :: $folder :: $themoviedbvidename :: TRAILER DOWNLOAD :: ERROR :: Skipping..."
+		echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: $currentsubprocessid of $themoviedbvideoslistidscount :: $folder :: $themoviedbvidename :: TRAILER DOWNLOAD :: Complete!"
+		echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: $currentsubprocessid of $themoviedbvideoslistidscount :: $folder :: $themoviedbvidename :: TRAILER :: Extracting thumbnail with ffmpeg..."
+		echo "========================START FFMPEG========================"
+		ffmpeg -y \
+			-ss 10 \
+			-i "$tempfile.mkv" \
+			-frames:v 1 \
+			-vf "scale=640:-2" \
+			"/config/temp/cover.jpg"
+		echo "========================STOP FFMPEG========================="
+		echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: $currentsubprocessid of $themoviedbvideoslistidscount :: $folder :: $themoviedbvidename :: Updating File Statistics via mkvtoolnix (mkvpropedit)..."
+		echo "========================START MKVPROPEDIT========================"
+		mkvpropedit "$tempfile.mkv" --add-track-statistics-tags
+		echo "========================STOP MKVPROPEDIT========================="
+		echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: $currentsubprocessid of $themoviedbvideoslistidscount :: $folder :: $themoviedbvidename :: TRAILER :: Embedding metadata with ffmpeg..."
+		echo "========================START FFMPEG========================"
+		mv "$tempfile.mkv" "$tempfile-temp.mkv"
+		ffmpeg -y \
+			-i "$tempfile-temp.mkv" \
+			-c copy \
+			-metadata TITLE="${themoviedbvidename}" \
+			-metadata DATE_RELEASE="$radarrmovieyear" \
+			-metadata GENRE="$radarrmoviegenre" \
+			-metadata COPYRIGHT="$radarrmovieostudio" \
+			-metadata ENCODED_BY="AMTD" \
+			-metadata CONTENT_TYPE="Movie $folder" \
+			-metadata:s:v:0 title="$qualitydescription" \
+			-metadata:s:a:0 title="$audiodescription" \
+			-attach "/config/temp/cover.jpg" -metadata:s:t mimetype=image/jpeg \
+			"$tempfile.mkv"
+		echo "========================STOP FFMPEG========================="
+		if [ -f "$tempfile.mkv" ]; then
+			echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: $currentsubprocessid of $themoviedbvideoslistidscount :: $folder :: $themoviedbvidename :: TRAILER :: Metadata Embedding Complete!"
+			if [ -f "$tempfile-temp.mkv" ]; then
+				rm "$tempfile-temp.mkv"
 			fi
-			
-			if [ -d "/config/temp" ]; then
-				rm -rf /config/temp
-			fi
-		done
-		if [ "$USEFOLDERS" == "true" ]; then
-			trailercount="$(find "$radarrmoviepath" -mindepth 2 -type f -iname "*.mkv" | wc -l)"
 		else
-			trailercount="$(find "$radarrmoviepath" -mindepth 1 -type f -regex '.*\(-trailer.mkv\|-scene.mkv\|-short.mkv\|-featurette.mkv\|-other.mkv\|-behindthescenes.mkv\)' | wc -l)"
+			echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: $currentsubprocessid of $themoviedbvideoslistidscount :: $folder :: $themoviedbvidename :: TRAILER :: ERROR: Metadata Embedding Failed!"
+			mv "$tempfile-temp.mkv" "$tempfile.mkv"
 		fi
+				
+		if [ -f "$tempfile.mkv" ]; then
+			if [ "$USEFOLDERS" == "false" ]; then
+				mv "$tempfile.mkv" "$outputfile"
+				chmod $FilePermissions "$outputfile"
+				chown abc:abc "$outputfile"
+			else
+				if [ ! -d "$radarrmoviepath/$folder" ]; then
+					mkdir -p "$radarrmoviepath/$folder"
+					chmod $FolderPermissions "$radarrmoviepath/$folder"
+					chown abc:abc "$radarrmoviepath/$folder"
+				fi
+				if [ -d "$radarrmoviepath/$folder" ]; then
+					mv "$tempfile.mkv" "$outputfile"
+					chmod $FilePermissions "$outputfile"
+					chown abc:abc "$outputfile"
+				fi
+			fi
+		fi
+		echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: $currentsubprocessid of $themoviedbvideoslistidscount :: $folder :: $themoviedbvidename :: Complete!"
+	else
+		echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: $currentsubprocessid of $themoviedbvideoslistidscount :: $folder :: $themoviedbvidename :: TRAILER DOWNLOAD :: ERROR :: Skipping..."
+	fi
+			
+	if [ -d "/config/temp" ]; then
+		rm -rf /config/temp
+	fi
+done
+
+if [ "$USEFOLDERS" == "true" ]; then
+	trailercount="$(find "$radarrmoviepath" -mindepth 2 -type f -iname "*.mkv" | wc -l)"
+else
+	trailercount="$(find "$radarrmoviepath" -mindepth 1 -type f -regex '.*\(-trailer.mkv\|-scene.mkv\|-short.mkv\|-featurette.mkv\|-other.mkv\|-behindthescenes.mkv\)' | wc -l)"
+fi
 		
-		echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: $trailercount Extras Downloaded!"
+echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: $trailercount Extras Downloaded!"
 
 exit 0
