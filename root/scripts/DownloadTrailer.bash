@@ -158,7 +158,6 @@ Configuration () {
 		echo "ERROR :: Exiting..."
 		exit 1
 	fi
-	sleep 2.5
 }
 
 Configuration
@@ -177,7 +176,7 @@ radarrmovieoverview="$(echo "${radarrmoviedata}" | jq -r ".overview")"
 radarrmovieostudio="$(echo "${radarrmoviedata}" | jq -r ".studio")"
 radarrtrailerid="$(echo "${radarrmoviedata}" | jq -r ".youTubeTrailerId")"
 youtubeurl="https://www.youtube.com/watch?v=$radarrtrailerid"
-
+themoviedbmovieid="$(echo "${radarrmoviedata}" | jq -r ".tmdbId")"
 
 
 
@@ -192,60 +191,58 @@ if [ -z "$radarrtrailerid" ]; then
 fi
 echo "Processing :: $radarrmovietitle"
 
-
-themoviedbmovieid="$(echo "${radarrmoviedata}" | jq -r ".tmdbId")"
 if [ -f "/config/cache/${themoviedbmovieid}-complete" ]; then
 	echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: All videos already downloaded, skipping..."
 	continue
 fi
 radarrmoviepath="$(echo "${radarrmoviedata}" | jq -r ".path")"
-	if [ ! -d "$radarrmoviepath" ]; then
+if [ ! -d "$radarrmoviepath" ]; then
 	echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: ERROR: Movie Path does not exist, Skipping..."
-			continue
+	continue
+fi
+radarrmovieyear="$(echo "${radarrmoviedata}" | jq -r ".year")"
+radarrmoviegenre="$(echo "${radarrmoviedata}" | jq -r ".genres | .[]" | head -n 1)"
+radarrmoviefolder="$(basename "${radarrmoviepath}")"
+radarrmovieostudio="$(echo "${radarrmoviedata}" | jq -r ".studio")"		
+echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle"
+		
+		
+IFS=',' read -r -a filters <<< "$LANGUAGES"
+for filter in "${filters[@]}"
+do
+	echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: Searching for \"$filter\" extras..."
+	themoviedbvideoslistdata=$(curl -s "https://api.themoviedb.org/3/movie/${themoviedbmovieid}/videos?api_key=${themoviedbapikey}&language=$filter")
+	if [ "$extrastype" == "all" ]; then
+		themoviedbvideoslistids=($(echo "$themoviedbvideoslistdata" | jq -r ".results[] |  select(.site==\"YouTube\" and .iso_639_1==\"$filter\") | .id"))
+	else
+		themoviedbvideoslistids=($(echo "$themoviedbvideoslistdata" | jq -r ".results[] |  select(.site==\"YouTube\" and .iso_639_1==\"$filter\" and .type==\"Trailer\") | .id"))
+	fi
+	themoviedbvideoslistidscount=$(echo "$themoviedbvideoslistdata" | jq -r ".results[] |  select(.site==\"YouTube\" and .iso_639_1==\"$filter\") | .id" | wc -l)
+	if [ -z "$themoviedbvideoslistids" ]; then
+		echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: None found..."
+		continue
+	else
+		break
+	fi
+done
+		
+if [ -z "$themoviedbvideoslistids" ]; then
+	echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: ERROR: No Extras in wanted languages found, Skipping..."
+	if [ -f "/config/logs/NotFound.log" ]; then
+		if cat "/config/logs/NotFound.log" | grep -i ":: $radarrmovietitle ::" | read; then
+			sleep 0.1
+		else
+			echo "No Trailer Found :: $radarrmovietitle :: themoviedb missing Youtube Trailer ID"  >> "/config/logs/NotFound.log"
 		fi
-		radarrmovieyear="$(echo "${radarrmoviedata}" | jq -r ".year")"
-		radarrmoviegenre="$(echo "${radarrmoviedata}" | jq -r ".genres | .[]" | head -n 1)"
-		radarrmoviefolder="$(basename "${radarrmoviepath}")"
-		radarrmovieostudio="$(echo "${radarrmoviedata}" | jq -r ".studio")"		
-		echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle"
-		
-		
-		IFS=',' read -r -a filters <<< "$LANGUAGES"
-		for filter in "${filters[@]}"
-		do
-			echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: Searching for \"$filter\" extras..."
-			themoviedbvideoslistdata=$(curl -s "https://api.themoviedb.org/3/movie/${themoviedbmovieid}/videos?api_key=${themoviedbapikey}&language=$filter")
-			if [ "$extrastype" == "all" ]; then
-				themoviedbvideoslistids=($(echo "$themoviedbvideoslistdata" | jq -r ".results[] |  select(.site==\"YouTube\" and .iso_639_1==\"$filter\") | .id"))
-			else
-				themoviedbvideoslistids=($(echo "$themoviedbvideoslistdata" | jq -r ".results[] |  select(.site==\"YouTube\" and .iso_639_1==\"$filter\" and .type==\"Trailer\") | .id"))
-			fi
-			themoviedbvideoslistidscount=$(echo "$themoviedbvideoslistdata" | jq -r ".results[] |  select(.site==\"YouTube\" and .iso_639_1==\"$filter\") | .id" | wc -l)
-			if [ -z "$themoviedbvideoslistids" ]; then
-				echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: None found..."
-				continue
-			else
-				break
-			fi
-		done
-		
-		if [ -z "$themoviedbvideoslistids" ]; then
-			echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: ERROR: No Extras in wanted languages found, Skipping..."
-			if [ -f "/config/logs/NotFound.log" ]; then
-				if cat "/config/logs/NotFound.log" | grep -i ":: $radarrmovietitle ::" | read; then
-					sleep 0.1
-				else
-					echo "No Trailer Found :: $radarrmovietitle :: themoviedb missing Youtube Trailer ID"  >> "/config/logs/NotFound.log"
-				fi
-			else
-				echo "No Trailer Found :: $radarrmovietitle :: themoviedb Missing Youtube Trailer ID"  >> "/config/logs/NotFound.log"
-			fi
-			continue
-		fi
+	else
+		echo "No Trailer Found :: $radarrmovietitle :: themoviedb Missing Youtube Trailer ID"  >> "/config/logs/NotFound.log"
+	fi
+	continue
+fi
 
-		echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: $themoviedbvideoslistidscount Extras Found!"
-		for id in ${!themoviedbvideoslistids[@]}; do
-			currentsubprocessid=$(( $id + 1 ))
+echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: $themoviedbvideoslistidscount Extras Found!"
+for id in ${!themoviedbvideoslistids[@]}; do
+	currentsubprocessid=$(( $id + 1 ))
 			themoviedbvideoid="${themoviedbvideoslistids[$id]}"
 			themoviedbvideodata="$(echo "$themoviedbvideoslistdata" | jq -r ".results[] | select(.id==\"$themoviedbvideoid\") | .")"
 			themoviedbvidelanguage="$(echo "$themoviedbvideodata" | jq -r ".iso_639_1")"
