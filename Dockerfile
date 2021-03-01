@@ -18,8 +18,7 @@ RUN \
 		python3 \
 		python3-pip \
 		ffmpeg \
-		mkvtoolnix \
-		cron && \
+		mkvtoolnix && \
 	apt-get purge --auto-remove -y && \
 	apt-get clean && \
 	echo "************ install youtube-dl ************" && \
@@ -38,10 +37,7 @@ RUN \
 	chmod g+w ${SMA_PATH}/config/sma.log && \
 	echo "************ install pip dependencies ************" && \
 	python3 -m pip install --user --upgrade pip && \	
-	pip3 install -r ${SMA_PATH}/setup/requirements.txt && \
-	echo "************ setup cron ************" && \
-	service cron start && \
-	echo "* * * * *   root   bash /scripts/update.bash" >> "/etc/crontab"
+	pip3 install -r ${SMA_PATH}/setup/requirements.txt
 	
 WORKDIR /
 
