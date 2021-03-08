@@ -2,7 +2,7 @@
 LANGUAGES="en"
 subtitlelanguage="en"
 extrastype="all"
-USEFOLDERS="false"
+USEFOLDERS="true"
 SINGLETRAILER="false"
 FilePermissions=666
 FolderPermissions=766
@@ -276,7 +276,7 @@ for id in ${!themoviedbvideoslistids[@]}; do
 			folder="Short"
 		fi
 	elif [ "$themoviedbvidetype" == "Teaser" ]; then
-		folder="Other"
+		folder="extras"
 	fi				
 			
 	echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: $currentsubprocessid of $themoviedbvideoslistidscount :: $folder :: $themoviedbvidename"
