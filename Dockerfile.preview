@@ -6,7 +6,6 @@ ENV UPDATE_SMA FALSE
 ENV SMA_APP Radarr
 
 RUN \
-	echo "************ install dependencies ************" && \
 	echo "************ install packages ************" && \
 	apt-get update -qq && \
 	apt-get install -qq -y \
