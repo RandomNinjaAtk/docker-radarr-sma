@@ -6,10 +6,6 @@ ENV UPDATE_SMA FALSE
 ENV SMA_APP Radarr
 
 RUN \
-	echo "************ install dependencies ************" && \
-	apt-get update && \
-	apt-get install -y software-properties-common && \
-	add-apt-repository ppa:jonathonf/ffmpeg-4 -y && \
 	echo "************ install packages ************" && \
 	apt-get update -qq && \
 	apt-get install -qq -y \
