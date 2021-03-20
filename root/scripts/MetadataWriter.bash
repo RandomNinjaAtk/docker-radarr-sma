@@ -24,7 +24,7 @@ log "Processing $mainprocessid of $radarrmovietotal :: $radarrmovietitle"
 if [ -f "$nfo" ]; then
 	if cat "$nfo" | grep "NFOWriter" | read; then
 		log "Processing $mainprocessid of $radarrmovietotal :: $radarrmovietitle :: NFO is compliant..."
-		continue
+		exit 0
 	fi
 	log "Processing $mainprocessid of $radarrmovietotal :: $radarrmovietitle :: NFO detected, removing..."
 	rm "$nfo"
@@ -127,4 +127,5 @@ echo "</movie>" >> "$nfo"
 if [ -f "$nfo" ]; then
 	log "Processing $mainprocessid of $radarrmovietotal :: $radarrmovietitle :: Writing Complete"
 fi
+
 exit 0
