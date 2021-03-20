@@ -20,13 +20,13 @@ radarrmoviepath="$(echo "${radarrmoviedata}" | jq -r ".path")"
 nfo="$radarrmoviepath/movie.nfo"
 poster="$radarrmoviepath/poster.jpg"
 fanart="$radarrmoviepath/fanart.jpg"
-log "Processing $mainprocessid of $radarrmovietotal :: $radarrmovietitle"
+log "Processing :: $radarrmovietitle"
 if [ -f "$nfo" ]; then
 	if cat "$nfo" | grep "NFOWriter" | read; then
-		log "Processing $mainprocessid of $radarrmovietotal :: $radarrmovietitle :: NFO is compliant..."
+		log "Processing :: $radarrmovietitle :: NFO is compliant..."
 		exit 0
 	fi
-	log "Processing $mainprocessid of $radarrmovietotal :: $radarrmovietitle :: NFO detected, removing..."
+	log "Processing :: $radarrmovietitle :: NFO detected, removing..."
 	rm "$nfo"
 fi
 	
@@ -48,10 +48,10 @@ radarrmovielocalfanart="MediaCover/${radarrid}/fanart.jpg"
 radarrmovieposter=$(echo "${radarrmoviedata}" | jq -r ".images[] | select(.coverType==\"poster\") | .remoteUrl")
 radarrmoviefanart=$(echo "${radarrmoviedata}" | jq -r ".images[] | select(.coverType==\"fanart\") | .remoteUrl")
 if [ -f "$nfo" ]; then
-	log "Processing $mainprocessid of $radarrmovietotal :: $radarrmovietitle :: NFO detected, removing..."
+	log "Processing :: $radarrmovietitle :: NFO detected, removing..."
 	rm "$nfo"
 fi
-log "Processing $mainprocessid of $radarrmovietotal :: $radarrmovietitle :: Writing NFO..."
+log "Processing :: $radarrmovietitle :: Writing NFO..."
 echo "<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>" >> "$nfo"
 echo "<movie>" >> "$nfo"
 echo "	<title>$radarrmovietitle</title>" >> "$nfo"
@@ -114,18 +114,20 @@ for id in ${!radarrmoviecast[@]}; do
 	name=$(echo "${radarrmoviecredit}" | jq -r ".[] | select(.id==$castid) | .personName")
 	order=$(echo "${radarrmoviecredit}" | jq -r ".[] | select(.id==$castid) | .order")
 	character=$(echo "${radarrmoviecredit}" | jq -r ".[] | select(.id==$castid) | .character")
+	tmdbid=$(echo "${radarrmoviecredit}" | jq -r ".[] | select(.id==$castid) | .personTmdbId")
 	thumb=$(echo "${radarrmoviecredit}" | jq -r ".[] | select(.id==$castid) | .images[].url")
 	echo "	<actor>" >> "$nfo"
 	echo "		<name>$name</name>" >> "$nfo"
 	echo "		<role>$character</role>" >> "$nfo"
 	echo "		<order>$order</order>" >> "$nfo"
 	echo "		<thumb>$thumb</thumb>" >> "$nfo"
+	echo "		<tmdbid>$tmdbid</tmdbid>" >> "$nfo"
 	echo "	</actor>" >> "$nfo"
 done
 echo "	<comment>NFOWriter</comment>" >> "$nfo"
 echo "</movie>" >> "$nfo"
 if [ -f "$nfo" ]; then
-	log "Processing $mainprocessid of $radarrmovietotal :: $radarrmovietitle :: Writing Complete"
+	log "Processing :: $radarrmovietitle :: Writing Complete"
 fi
 
 exit 0
