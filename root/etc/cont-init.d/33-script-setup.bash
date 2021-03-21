@@ -52,7 +52,7 @@ fi
 
 # import script
 if [ ! -f "/config/scripts/Mass-MetadataWriter.bash" ]; then
-	cp "/scripts/Mass-MetadataWriter.bash" "/config/scripts/MetadataWriter.bash"
+	cp "/scripts/Mass-MetadataWriter.bash" "/config/scripts/Mass-MetadataWriter.bash"
 fi
 
 # set permissions
