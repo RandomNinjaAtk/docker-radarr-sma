@@ -47,6 +47,8 @@ radarrmovielocalposter="MediaCover/${radarrid}/poster.jpg"
 radarrmovielocalfanart="MediaCover/${radarrid}/fanart.jpg"
 radarrmovieposter=$(echo "${radarrmoviedata}" | jq -r ".images[] | select(.coverType==\"poster\") | .remoteUrl")
 radarrmoviefanart=$(echo "${radarrmoviedata}" | jq -r ".images[] | select(.coverType==\"fanart\") | .remoteUrl")
+radarrmovieimbdid="$(echo "${radarrmoviedata}" | jq -r ".imdbId")"
+radarrmovietmdbid="$(echo "${radarrmoviedata}" | jq -r ".tmdbId")"
 if [ -f "$nfo" ]; then
 	log "Processing :: $radarrmovietitle :: NFO detected, removing..."
 	rm "$nfo"
@@ -64,6 +66,8 @@ if  [ $radarrmoviecertification == null ]; then
 else
 	echo "	<mpaa>$radarrmoviecertification</mpaa>" >> "$nfo"
 fi
+echo "	<uniqueid type=\"tmdb\" default=\"true\">$radarrmovietmdbid</uniqueid>" >> "$nfo"
+echo "	<uniqueid type=\"imdb\" >$radarrmovieimbdid</uniqueid>" >> "$nfo"
 if [ -f "/config/${radarrmovielocalposter}" ]; then
 	if [ ! -f "$poster" ]; then
 		cp "/config/${radarrmovielocalposter}" "$poster"
