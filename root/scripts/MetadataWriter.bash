@@ -107,7 +107,7 @@ for id in ${!radarrmoviedirectors[@]}; do
 	name=$(echo "${radarrmoviecredit}" | jq -r ".[] | select(.id==$directorid) | .personName")
 	echo "	<director>$name</director>" >> "$nfo"
 done
-if  [ ! -z "$radarrmoviedatecinemas" ]; then
+if  [ $radarrmoviedatecinemas != null ]; then
 	echo "	<premiered>${radarrmoviedatecinemas:0:10}</premiered>" >> "$nfo"
 fi
 echo "	<year>$radarrmovieyear</year>" >> "$nfo"
