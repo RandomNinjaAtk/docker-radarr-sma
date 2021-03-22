@@ -35,14 +35,17 @@ radarrmovieruntime="$(echo "${radarrmoviedata}" | jq -r ".runtime")"
 radarrmovieyear="$(echo "${radarrmoviedata}" | jq -r ".year")"
 radarrmoviedatecinemas="$(echo "${radarrmoviedata}" | jq -r ".inCinemas")"
 radarrmoviepath="$(echo "${radarrmoviedata}" | jq -r ".path")"
-radarrmoviegenres=($(echo "${radarrmoviedata}" | jq -r ".genres | .[]"))
 radarrmoviecertification="$(echo "${radarrmoviedata}" | jq -r ".certification")"
 radarrmovieoverview="$(echo "${radarrmoviedata}" | jq -r ".overview")"
 radarrmoviefilename="$(echo "${radarrmoviedata}" | jq -r ".movieFile.relativePath")"
 radarrmovieostudio="$(echo "${radarrmoviedata}" | jq -r ".studio")"
-radarrmoviedirectors=($(echo "${radarrmoviecredit}" | jq -r ".[] | select(.job==\"Director\") | .id"))
+OLDIFS="$IFS"
+IFS=$'\n'
+radarrmoviegenres=($(echo "${radarrmoviedata}" | jq -r ".genres | .[] | ."))
+radarrmoviedirectors=($(echo "${radarrmoviecredit}" | jq -r ".[] | select(.job==\"Director\") | .personName" | sort -u))
+radarrmoviewriters=($(echo "${radarrmoviecredit}" | jq -r ".[] | select(.department==\"Writing\") | .personName" | sort -u))
+IFS="$OLDIFS"
 radarrmoviecast=($(echo "${radarrmoviecredit}" | jq -r ".[] | select(.type==\"cast\") | .id"))
-radarrmoviewriters=($(echo "${radarrmoviecredit}" | jq -r ".[] | select(.department==\"Writing\") | .id"))
 radarrmovielocalposter="MediaCover/${radarrid}/poster.jpg"
 radarrmovielocalfanart="MediaCover/${radarrid}/fanart.jpg"
 radarrmovieposter=$(echo "${radarrmoviedata}" | jq -r ".images[] | select(.coverType==\"poster\") | .remoteUrl")
@@ -90,21 +93,16 @@ else
 	echo "	    <thumb>$radarrmoviefanart</thumb>" >> "$nfo"
 fi
 echo "	</fanart>" >> "$nfo"
-for genere in ${!radarrmoviegenres[@]}; do
-	currentprocessid=$(( $id + 1 ))
-	moviegenre="${radarrmoviegenres[$genere]}"
+for genre in ${!radarrmoviegenres[@]}; do
+	moviegenre="${radarrmoviegenres[$genre]}"
 	echo "	<genre>$moviegenre</genre>" >> "$nfo"
 done
-for id in ${!radarrmoviewriters[@]}; do
-	currentprocessid=$(( $id + 1 ))
-	writerid="${radarrmoviewriters[$id]}"
-	name=$(echo "${radarrmoviecredit}" | jq -r ".[] | select(.id==$writerid) | .personName")
+for writer in ${!radarrmoviewriters[@]}; do
+	name="${radarrmoviewriters[$writer]}"
 	echo "	<credits>$name</credits>" >> "$nfo"
 done
-for id in ${!radarrmoviedirectors[@]}; do
-	currentprocessid=$(( $id + 1 ))
-	directorid="${radarrmoviedirectors[$id]}"
-	name=$(echo "${radarrmoviecredit}" | jq -r ".[] | select(.id==$directorid) | .personName")
+for director in ${!radarrmoviedirectors[@]}; do
+	name="${radarrmoviedirectors[$director]}"
 	echo "	<director>$name</director>" >> "$nfo"
 done
 if  [ $radarrmoviedatecinemas != null ]; then
