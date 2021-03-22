@@ -14,7 +14,8 @@ RUN \
 		python3 \
 		python3-pip \
 		ffmpeg \
-		mkvtoolnix && \
+		mkvtoolnix \
+		tidy && \
 	apt-get purge --auto-remove -y && \
 	apt-get clean && \
 	echo "************ install python packages ************" && \
