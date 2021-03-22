@@ -128,7 +128,7 @@ for id in ${!radarrmoviecast[@]}; do
 done
 echo "	<comment>NFOWriter</comment>" >> "$nfo"
 echo "</movie>" >> "$nfo"
-tidy -m -xml "$nfo" &>/dev/null
+tidy -i -m -xml "$nfo" &>/dev/null
 if [ -f "$nfo" ]; then
 	log "Processing :: $radarrmovietitle :: Writing Complete"
 fi
