@@ -27,8 +27,7 @@ WriteNFO () {
 			rm "$nfo"
 		else
 			log "Processing $mainprocessid of $radarrmovietotal :: $radarrmovietitle :: Detected NFO doesn't require update..." 
-			# continue
-			rm "$nfo"
+			return
 		fi
 	fi
 	radarrmovieimbdid="$(echo "${radarrmoviedata}" | jq -r ".imdbId")"
