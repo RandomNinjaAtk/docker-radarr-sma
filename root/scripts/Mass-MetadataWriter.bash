@@ -33,9 +33,13 @@ WriteNFO () {
 	radarrmovieimbdid="$(echo "${radarrmoviedata}" | jq -r ".imdbId")"
 	radarrmovietmdbid="$(echo "${radarrmoviedata}" | jq -r ".tmdbId")"
 	themoviedbmoviedata=$(curl -s "https://api.themoviedb.org/3/movie/${radarrmovietmdbid}?api_key=${themoviedbapikey}")
+	themoviedbmoviekeywords=$(curl -s "https://api.themoviedb.org/3/movie/${radarrmovietmdbid}/keywords?api_key=${themoviedbapikey}")
 	themoviedbmoviesetnull=$(echo "$themoviedbmoviedata" | jq -r ".belongs_to_collection")	
 	themoviedbmoviesetids=$(echo "$themoviedbmoviedata" | jq -r ".belongs_to_collection.id")
-	tmbdtagline=$(echo "$themoviedbmoviedata" | jq -r ".tagline")	
+	themoviedbmovieoriginaltitle=$(echo "$themoviedbmoviedata" | jq -r ".original_title")	
+	tmbdtagline=$(echo "$themoviedbmoviedata" | jq -r ".tagline")
+	tmdb_vote_average=$(echo "$themoviedbmoviedata" | jq -r ".vote_average")
+	tmdb_vote_count=$(echo "$themoviedbmoviedata" | jq -r ".vote_count")
 	radarrmoviesorttitle="$(echo "${radarrmoviedata}" | jq -r ".sortTitle")"
 	radarrmovieruntime="$(echo "${radarrmoviedata}" | jq -r ".runtime")"
 	radarrmovieyear="$(echo "${radarrmoviedata}" | jq -r ".year")"
@@ -45,11 +49,14 @@ WriteNFO () {
 	radarrmoviecertification="$(echo "${radarrmoviedata}" | jq -r ".certification")"
 	radarrmovieoverview="$(echo "${radarrmoviedata}" | jq -r ".overview")"
 	radarrmoviefilename="$(echo "${radarrmoviedata}" | jq -r ".movieFile.relativePath")"
-	radarrmovieostudio="$(echo "${radarrmoviedata}" | jq -r ".studio")"
+	radarr_youTubeTrailerId="$(echo "${radarrmoviedata}" | jq -r ".youTubeTrailerId")"
 	radarrmoviecast=($(echo "${radarrmoviecredit}" | jq -r ".[] | select(.type==\"cast\") | .id"))
 	OLDIFS="$IFS"
 	IFS=$'\n'
-	radarrmoviegenres=($(echo "${radarrmoviedata}" | jq -r ".genres | .[] | ."))
+	radarrmoviestudios=($(echo "${themoviedbmoviedata}" | jq -r ".production_companies[].name"))
+	radarrmoviecountries=($(echo "${themoviedbmoviedata}" | jq -r ".production_countries[].name"))
+	tmdb_keywords_names=($(echo "$themoviedbmoviekeywords" | jq -r ".keywords[].name"))
+	radarrmoviegenres=($(echo "${themoviedbmoviedata}" | jq -r ".genres[].name"))
 	radarrmoviedirectors=($(echo "${radarrmoviecredit}" | jq -r ".[] | select(.job==\"Director\") | .personName" | sort -u))
 	radarrmoviewriters=($(echo "${radarrmoviecredit}" | jq -r ".[] | select(.department==\"Writing\") | .personName" | sort -u))
 	IFS="$OLDIFS"
@@ -66,7 +73,14 @@ WriteNFO () {
 	echo "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\" ?>" >> "$nfo"
 	echo "<movie>" >> "$nfo"
 	echo "	<title>$radarrmovietitle</title>" >> "$nfo"
+	echo "	<originaltitle>$themoviedbmovieoriginaltitle</originaltitle>" >> "$nfo"
 	echo "	<sorttitle>$radarrmoviesorttitle</sorttitle>" >> "$nfo"
+	echo "	<ratings>" >> "$nfo"
+	echo "	    <rating name=\"themoviedb\" max=\"10\" default=\"true\">" >> "$nfo"
+	echo "	    	<value>$tmdb_vote_average</value>" >> "$nfo"
+	echo "	    	<votes>$tmdb_vote_count</votes>" >> "$nfo"
+	echo "		</rating>" >> "$nfo"
+	echo "	</ratings>" >> "$nfo"
 	echo "	<outline>$radarrmovieoverview</outline>" >> "$nfo"
 	echo "	<plot>$radarrmovieoverview</plot>" >> "$nfo"
 	if  [ "$tmbdtagline" != "null" ]; then
@@ -78,8 +92,15 @@ WriteNFO () {
 	else
 		echo "	<mpaa>$radarrmoviecertification</mpaa>" >> "$nfo"
 	fi
-	echo "	<uniqueid type=\"tmdb\" default=\"true\">$radarrmovietmdbid</uniqueid>" >> "$nfo"
-	echo "	<uniqueid type=\"imdb\" >$radarrmovieimbdid</uniqueid>" >> "$nfo"
+	echo "	<playcount/>" >> "$nfo"
+	echo "	<lastplayed/>" >> "$nfo"
+	echo "	<id>$radarrmovieimbdid</id>" >> "$nfo"
+	echo "	<tmdbid>$radarrmovietmdbid</tmdbid>" >> "$nfo"
+	if  [ $themoviedbmoviesetids != null ]; then
+		echo "	<tmdbCollectionId>$themoviedbmoviesetids</tmdbCollectionId>" >> "$nfo"
+	fi
+	echo "	<uniqueid type=\"imdb\" default=\"true\">$radarrmovieimbdid</uniqueid>" >> "$nfo"
+	echo "	<uniqueid type=\"tmdb\" default=\"false\">$radarrmovietmdbid</uniqueid>" >> "$nfo"
 	if [ -f "/config/${radarrmovielocalposter}" ]; then
 		if [ ! -f "$poster" ]; then
 			cp "/config/${radarrmovielocalposter}" "$poster"
@@ -106,7 +127,14 @@ WriteNFO () {
 		moviegenre="${radarrmoviegenres[$genre]}"
 		echo "	<genre>$moviegenre</genre>" >> "$nfo"
 	done
-	
+	if [ ! -z "$radarrmoviecountries" ]; then
+		for country in ${!radarrmoviecountries[@]}; do
+			name="${radarrmoviecountries[$country]}"
+			echo "	<country>$name</country>" >> "$nfo"
+		done
+	else
+		echo "	<country/>" >> "$nfo"
+	fi
 	if  [ $themoviedbmoviesetids != null ]; then
 		tmdbsetid="${themoviedbmoviesetids}"
 		tmdbcollectiondata=$(curl -s "https://api.themoviedb.org/3/collection/${tmdbsetid}?api_key=${themoviedbapikey}")
@@ -117,7 +145,14 @@ WriteNFO () {
 		echo "	    <overview>$tmdb_collection_overview</overview>" >> "$nfo"
 		echo "	</set>" >> "$nfo"
 	fi
-	
+	if [ ! -z "$tmdb_keywords_names" ]; then
+		for keyword in ${!tmdb_keywords_names[@]}; do
+			name="${tmdb_keywords_names[$keyword]}"
+			echo "	<tag>$name</tag>" >> "$nfo"
+		done
+	else
+		echo "	<tag/>" >> "$nfo"
+	fi
 	for writer in ${!radarrmoviewriters[@]}; do
 		name="${radarrmoviewriters[$writer]}"
 		echo "	<credits>$name</credits>" >> "$nfo"
@@ -130,7 +165,19 @@ WriteNFO () {
 		echo "	<premiered>${radarrmoviedatecinemas:0:10}</premiered>" >> "$nfo"
 	fi
 	echo "	<year>$radarrmovieyear</year>" >> "$nfo"
-	echo "	<studio>$radarrmovieostudio</studio>" >> "$nfo"
+	if [ ! -z "$radarrmoviestudios" ]; then
+		for studio in ${!radarrmoviestudios[@]}; do
+			name="${radarrmoviestudios[$studio]}"
+			echo "	<studio>$name</studio>" >> "$nfo"
+		done
+	else
+		echo "	<studio/>" >> "$nfo"
+	fi
+	if [ ! -z "$radarr_youTubeTrailerId" ]; then
+		echo "	<trailer>https://www.youtube.com/watch?v=${radarr_youTubeTrailerId}</trailer>" >> "$nfo"
+	else
+		echo "	<trailer/>" >> "$nfo"
+	fi
 	for id in ${!radarrmoviecast[@]}; do
 		currentprocessid=$(( $id + 1 ))
 		castid="${radarrmoviecast[$id]}"
@@ -143,7 +190,11 @@ WriteNFO () {
 		echo "		<name>$name</name>" >> "$nfo"
 		echo "		<role>$character</role>" >> "$nfo"
 		echo "		<order>$order</order>" >> "$nfo"
-		echo "		<thumb>$thumb</thumb>" >> "$nfo"
+		if [ ! -z "$thumb" ]; then
+			echo "		<thumb>$thumb</thumb>" >> "$nfo"
+		else
+			echo "		<thumb/>" >> "$nfo"
+		fi
 		echo "		<tmdbid>$tmdbid</tmdbid>" >> "$nfo"
 		echo "	</actor>" >> "$nfo"
 	done
@@ -153,8 +204,6 @@ WriteNFO () {
 		log "Processing $mainprocessid of $radarrmovietotal :: $radarrmovietitle :: Writing Complete"
 	fi
 }
-
-
 
 log "############## NFO Writer"
 for id in ${!radarrmovieids[@]}; do
