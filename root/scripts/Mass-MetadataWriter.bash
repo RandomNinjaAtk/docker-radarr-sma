@@ -69,6 +69,9 @@ WriteNFO () {
 	echo "	<sorttitle>$radarrmoviesorttitle</sorttitle>" >> "$nfo"
 	echo "	<outline>$radarrmovieoverview</outline>" >> "$nfo"
 	echo "	<plot>$radarrmovieoverview</plot>" >> "$nfo"
+	if  [ "$tmbdtagline" != "null" ]; then
+		echo "	<tagline>$tmbdtagline</tagline>" >> "$nfo"
+	fi
 	echo "	<runtime>$radarrmovieruntime</runtime>" >> "$nfo"
 	if  [ $radarrmoviecertification == null ]; then
 		echo "	<mpaa>NR</mpaa>" >> "$nfo"
@@ -113,10 +116,6 @@ WriteNFO () {
 		echo "	    <name>$tmdb_collection_name</name>" >> "$nfo"
 		echo "	    <overview>$tmdb_collection_overview</overview>" >> "$nfo"
 		echo "	</set>" >> "$nfo"
-	fi
-	
-	if  [ "$tmbdtagline" != "null" ]; then
-		echo "	<tag>$tmbdtagline</tag>" >> "$nfo"
 	fi
 	
 	for writer in ${!radarrmoviewriters[@]}; do
