@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 RadarrAPIkey="$(grep "<ApiKey>" /config/config.xml | sed "s/\  <ApiKey>//;s/<\/ApiKey>//")"
 RadarrUrl="http://127.0.0.1:7878"
+themoviedbapikey="3b7751e3179f796565d88fdb2fcdf426"
 
 log () {
 	m_time=`date "+%F %T"`
@@ -11,10 +12,7 @@ radarrmovielist=$(curl -s --header "X-Api-Key:"${RadarrAPIkey} --request GET  "$
 radarrmovietotal=$(echo "${radarrmovielist}"  | jq -r '.[] | select(.hasFile==true) | .id' | wc -l)
 radarrmovieids=($(echo "${radarrmovielist}" | jq -r '.[] | select(.hasFile==true) | .id'))
 
-log "############## NFO Writer"
-for id in ${!radarrmovieids[@]}; do
-	mainprocessid=$(( $id + 1 ))
-	radarrid="${radarrmovieids[$id]}"
+WriteNFO () {
 	radarrmoviedata="$(curl -s --header "X-Api-Key:"${RadarrAPIkey} --request GET  "$RadarrUrl/api/movie/$radarrid")"
 	radarrmoviecredit="$(curl -s --header "X-Api-Key:"${RadarrAPIkey} --request GET  "$RadarrUrl/api/v3/credit?movieId=$radarrid")"
 	radarrmovietitle="$(echo "${radarrmoviedata}" | jq -r ".title")"
@@ -24,14 +22,20 @@ for id in ${!radarrmovieids[@]}; do
 	fanart="$radarrmoviepath/fanart.jpg"
 	log "Processing $mainprocessid of $radarrmovietotal :: $radarrmovietitle"
 	if [ -f "$nfo" ]; then
-		if cat "$nfo" | grep "NFOWriter" | read; then
-			log "Processing $mainprocessid of $radarrmovietotal :: $radarrmovietitle :: NFO is compliant..."
-			continue
+		if find "$nfo" -name "movie.nfo" -type f -mtime +30 | read; then
+			log "Processing $mainprocessid of $radarrmovietotal :: $radarrmovietitle :: NFO detected, removing..."
+			rm "$nfo"
+		else
+			log "Processing $mainprocessid of $radarrmovietotal :: $radarrmovietitle :: Detected NFO doesn't require update..." 
+			return
 		fi
-		log "Processing $mainprocessid of $radarrmovietotal :: $radarrmovietitle :: NFO detected, removing..."
-		rm "$nfo"
 	fi
-	
+	radarrmovieimbdid="$(echo "${radarrmoviedata}" | jq -r ".imdbId")"
+	radarrmovietmdbid="$(echo "${radarrmoviedata}" | jq -r ".tmdbId")"
+	themoviedbmoviedata=$(curl -s "https://api.themoviedb.org/3/movie/${radarrmovietmdbid}?api_key=${themoviedbapikey}")
+	themoviedbmoviesetnull=$(echo "$themoviedbmoviedata" | jq -r ".belongs_to_collection")	
+	themoviedbmoviesetids=$(echo "$themoviedbmoviedata" | jq -r ".belongs_to_collection.id")
+	tmbdtagline=$(echo "$themoviedbmoviedata" | jq -r ".tagline")	
 	radarrmoviesorttitle="$(echo "${radarrmoviedata}" | jq -r ".sortTitle")"
 	radarrmovieruntime="$(echo "${radarrmoviedata}" | jq -r ".runtime")"
 	radarrmovieyear="$(echo "${radarrmoviedata}" | jq -r ".year")"
@@ -53,8 +57,7 @@ for id in ${!radarrmovieids[@]}; do
 	radarrmovielocalfanart="MediaCover/${radarrid}/fanart.jpg"
 	radarrmovieposter=$(echo "${radarrmoviedata}" | jq -r ".images[] | select(.coverType==\"poster\") | .remoteUrl")
 	radarrmoviefanart=$(echo "${radarrmoviedata}" | jq -r ".images[] | select(.coverType==\"fanart\") | .remoteUrl")
-	radarrmovieimbdid="$(echo "${radarrmoviedata}" | jq -r ".imdbId")"
-	radarrmovietmdbid="$(echo "${radarrmoviedata}" | jq -r ".tmdbId")"
+	
 	if [ -f "$nfo" ]; then
 		log "Processing $mainprocessid of $radarrmovietotal :: $radarrmovietitle :: NFO detected, removing..."
 		rm "$nfo"
@@ -100,6 +103,22 @@ for id in ${!radarrmovieids[@]}; do
 		moviegenre="${radarrmoviegenres[$genre]}"
 		echo "	<genre>$moviegenre</genre>" >> "$nfo"
 	done
+	
+	if  [ $themoviedbmoviesetids != null ]; then
+		tmdbsetid="${themoviedbmoviesetids}"
+		tmdbcollectiondata=$(curl -s "https://api.themoviedb.org/3/collection/${tmdbsetid}?api_key=${themoviedbapikey}")
+		tmdb_collection_name=$(echo "$tmdbcollectiondata" | jq -r ".name")
+		tmdb_collection_overview=$(echo "$tmdbcollectiondata" | jq -r ".overview")
+		echo "	<set>" >> "$nfo"
+		echo "	    <name>$tmdb_collection_name</name>" >> "$nfo"
+		echo "	    <overview>$tmdb_collection_overview</overview>" >> "$nfo"
+		echo "	</set>" >> "$nfo"
+	fi
+	
+	if  [ "$tmbdtagline" != "null" ]; then
+		echo "	<tag>$tmbdtagline</tag>" >> "$nfo"
+	fi
+	
 	for writer in ${!radarrmoviewriters[@]}; do
 		name="${radarrmoviewriters[$writer]}"
 		echo "	<credits>$name</credits>" >> "$nfo"
@@ -129,12 +148,20 @@ for id in ${!radarrmovieids[@]}; do
 		echo "		<tmdbid>$tmdbid</tmdbid>" >> "$nfo"
 		echo "	</actor>" >> "$nfo"
 	done
-	echo "	<comment>NFOWriter</comment>" >> "$nfo"
 	echo "</movie>" >> "$nfo"
 	tidy -w 2000 -i -m -xml "$nfo" &>/dev/null
 	if [ -f "$nfo" ]; then
 		log "Processing $mainprocessid of $radarrmovietotal :: $radarrmovietitle :: Writing Complete"
 	fi
+}
+
+
+
+log "############## NFO Writer"
+for id in ${!radarrmovieids[@]}; do
+	mainprocessid=$(( $id + 1 ))
+	radarrid="${radarrmovieids[$id]}"
+	WriteNFO
 done
 
 exit 0
