@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-apikey="$(grep "<ApiKey>" /config/config.xml | sed "s/\  <ApiKey>//;s/<\/ApiKey>//")"
+RadarrAPIkey="$(grep "<ApiKey>" /config/config.xml | sed "s/\  <ApiKey>//;s/<\/ApiKey>//")"
 RadarrUrl="http://127.0.0.1:7878"
+themoviedbapikey="3b7751e3179f796565d88fdb2fcdf426"
 
 log () {
     m_time=`date "+%F %T"`
@@ -69,6 +70,9 @@ WriteNFO () {
 	echo "	<sorttitle>$radarrmoviesorttitle</sorttitle>" >> "$nfo"
 	echo "	<outline>$radarrmovieoverview</outline>" >> "$nfo"
 	echo "	<plot>$radarrmovieoverview</plot>" >> "$nfo"
+	if  [ "$tmbdtagline" != "null" ]; then
+		echo "	<tagline>$tmbdtagline</tagline>" >> "$nfo"
+	fi
 	echo "	<runtime>$radarrmovieruntime</runtime>" >> "$nfo"
 	if  [ $radarrmoviecertification == null ]; then
 		echo "	<mpaa>NR</mpaa>" >> "$nfo"
@@ -113,10 +117,6 @@ WriteNFO () {
 		echo "	    <name>$tmdb_collection_name</name>" >> "$nfo"
 		echo "	    <overview>$tmdb_collection_overview</overview>" >> "$nfo"
 		echo "	</set>" >> "$nfo"
-	fi
-	
-	if  [ "$tmbdtagline" != "null" ]; then
-		echo "	<tag>$tmbdtagline</tag>" >> "$nfo"
 	fi
 	
 	for writer in ${!radarrmoviewriters[@]}; do
