@@ -146,11 +146,6 @@ WriteNFO () {
 		echo "	<set>" >> "$nfo"
 		echo "	    <name>$tmdb_collection_name</name>" >> "$nfo"
 		echo "	    <overview>$tmdb_collection_overview</overview>" >> "$nfo"
-		if [ ! -z "$tmdb_collection_poster_path" ]; then
-			echo "		<thumb aspect=\"poster\">https://image.tmdb.org/t/p/original${tmdb_collection_poster_path}</thumb>" >> "$nfo"
-		else
-			echo "		<thumb/>" >> "$nfo"
-		fi
 		echo "	</set>" >> "$nfo"
 	fi
 	if [ ! -z "$tmdb_keywords_names" ]; then
