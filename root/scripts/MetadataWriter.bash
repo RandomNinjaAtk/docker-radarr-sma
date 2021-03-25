@@ -4,13 +4,13 @@ RadarrUrl="http://127.0.0.1:7878"
 themoviedbapikey="3b7751e3179f796565d88fdb2fcdf426"
 
 log () {
-    m_time=`date "+%F %T"`
-    echo $m_time" "$1
+	m_time=`date "+%F %T"`
+	echo $m_time" "$1
 }
 
 if [ $radarr_eventtype == "Test" ]; then
 	log "Tested"
-	exit 0	
+	exit 0
 fi
 
 WriteNFO () {
@@ -27,20 +27,22 @@ WriteNFO () {
 			log "Processing $mainprocessid of $radarrmovietotal :: $radarrmovietitle :: NFO detected, removing..."
 			rm "$nfo"
 		else
-			log "Processing $mainprocessid of $radarrmovietotal :: $radarrmovietitle :: Detected NFO doesn't require update..." 
-			return
+			log "Processing $mainprocessid of $radarrmovietotal :: $radarrmovietitle :: Detected NFO doesn't require update..."
+			#return
 		fi
 	fi
 	radarrmovieimbdid="$(echo "${radarrmoviedata}" | jq -r ".imdbId")"
 	radarrmovietmdbid="$(echo "${radarrmoviedata}" | jq -r ".tmdbId")"
 	themoviedbmoviedata=$(curl -s "https://api.themoviedb.org/3/movie/${radarrmovietmdbid}?api_key=${themoviedbapikey}")
 	themoviedbmoviekeywords=$(curl -s "https://api.themoviedb.org/3/movie/${radarrmovietmdbid}/keywords?api_key=${themoviedbapikey}")
-	themoviedbmoviesetnull=$(echo "$themoviedbmoviedata" | jq -r ".belongs_to_collection")	
+	themoviedbmoviesetnull=$(echo "$themoviedbmoviedata" | jq -r ".belongs_to_collection")
 	themoviedbmoviesetids=$(echo "$themoviedbmoviedata" | jq -r ".belongs_to_collection.id")
-	themoviedbmovieoriginaltitle=$(echo "$themoviedbmoviedata" | jq -r ".original_title")	
+	themoviedbmovieoriginaltitle=$(echo "$themoviedbmoviedata" | jq -r ".original_title")
 	tmbdtagline=$(echo "$themoviedbmoviedata" | jq -r ".tagline")
 	tmdb_vote_average=$(echo "$themoviedbmoviedata" | jq -r ".vote_average")
 	tmdb_vote_count=$(echo "$themoviedbmoviedata" | jq -r ".vote_count")
+	tmdb_poster_path=$(echo "$themoviedbmoviedata" | jq -r ".poster_path")
+	tmdb_backdrop_path=$(echo "$themoviedbmoviedata" | jq -r ".backdrop_path")
 	radarrmoviesorttitle="$(echo "${radarrmoviedata}" | jq -r ".sortTitle")"
 	radarrmovieruntime="$(echo "${radarrmoviedata}" | jq -r ".runtime")"
 	radarrmovieyear="$(echo "${radarrmoviedata}" | jq -r ".year")"
@@ -61,11 +63,7 @@ WriteNFO () {
 	radarrmoviedirectors=($(echo "${radarrmoviecredit}" | jq -r ".[] | select(.job==\"Director\") | .personName" | sort -u))
 	radarrmoviewriters=($(echo "${radarrmoviecredit}" | jq -r ".[] | select(.department==\"Writing\") | .personName" | sort -u))
 	IFS="$OLDIFS"
-	radarrmovielocalposter="MediaCover/${radarrid}/poster.jpg"
-	radarrmovielocalfanart="MediaCover/${radarrid}/fanart.jpg"
-	radarrmovieposter=$(echo "${radarrmoviedata}" | jq -r ".images[] | select(.coverType==\"poster\") | .remoteUrl")
-	radarrmoviefanart=$(echo "${radarrmoviedata}" | jq -r ".images[] | select(.coverType==\"fanart\") | .remoteUrl")
-	
+
 	if [ -f "$nfo" ]; then
 		log "Processing $mainprocessid of $radarrmovietotal :: $radarrmovietitle :: NFO detected, removing..."
 		rm "$nfo"
@@ -102,26 +100,16 @@ WriteNFO () {
 	fi
 	echo "	<uniqueid type=\"imdb\" default=\"true\">$radarrmovieimbdid</uniqueid>" >> "$nfo"
 	echo "	<uniqueid type=\"tmdb\" default=\"false\">$radarrmovietmdbid</uniqueid>" >> "$nfo"
-	if [ -f "/config/${radarrmovielocalposter}" ]; then
-		if [ ! -f "$poster" ]; then
-			cp "/config/${radarrmovielocalposter}" "$poster"
-		fi
-	fi
-	if [ -f "/config/${radarrmovielocalfanart}" ]; then
-		if [ ! -f "$fanart" ]; then
-			cp "/config/${radarrmovielocalfanart}" "$fanart"
-		fi
-	fi
-	if [ -f "$poster" ]; then
-		echo "	<thumb aspect=\"poster\">poster.jpg</thumb>" >> "$nfo"
+	if [ "$tmdb_poster_path" != "null" ]; then
+		echo "	<thumb aspect=\"poster\">https://image.tmdb.org/t/p/original$tmdb_poster_path</thumb>" >> "$nfo"
 	else
-		echo "	<thumb aspect=\"poster\">$radarrmovieposter</thumb>" >> "$nfo"
+		echo "	<thumb/>" >> "$nfo"
 	fi
 	echo "	<fanart>" >> "$nfo"
-	if [ -f "$fanart" ]; then
-		echo "	    <thumb>fanart.jpg</thumb>" >> "$nfo"
+	if [ "$tmdb_backdrop_path" != "null" ]; then
+		echo "	    <thumb>https://image.tmdb.org/t/p/original$tmdb_backdrop_path</thumb>" >> "$nfo"
 	else
-		echo "	    <thumb>$radarrmoviefanart</thumb>" >> "$nfo"
+		echo "	    <thumb/>" >> "$nfo"
 	fi
 	echo "	</fanart>" >> "$nfo"
 	for genre in ${!radarrmoviegenres[@]}; do
