@@ -135,18 +135,18 @@ WriteNFO () {
 	else
 		echo "	<country/>" >> "$nfo"
 	fi
-	if  [ $themoviedbmoviesetids != null ]; then
-		tmdbsetid="${themoviedbmoviesetids}"
-		tmdbcollectiondata=$(curl -s "https://api.themoviedb.org/3/collection/${tmdbsetid}?api_key=${themoviedbapikey}")
-		tmdb_collection_name=$(echo "$tmdbcollectiondata" | jq -r ".name")
-		tmdb_collection_overview=$(echo "$tmdbcollectiondata" | jq -r ".overview")
-		tmdb_collection_poster_path=$(echo "$tmdbcollectiondata" | jq -r ".poster_path")
-		tmdb_collection_backdrop_path=$(echo "$tmdbcollectiondata" | jq -r ".backdrop_path")
-		echo "	<set>" >> "$nfo"
-		echo "	    <name>$tmdb_collection_name</name>" >> "$nfo"
-		echo "	    <overview>$tmdb_collection_overview</overview>" >> "$nfo"
-		echo "	</set>" >> "$nfo"
-	fi
+	# if  [ $themoviedbmoviesetids != null ]; then
+	#	tmdbsetid="${themoviedbmoviesetids}"
+	#	tmdbcollectiondata=$(curl -s "https://api.themoviedb.org/3/collection/${tmdbsetid}?api_key=${themoviedbapikey}")
+	#	tmdb_collection_name=$(echo "$tmdbcollectiondata" | jq -r ".name")
+	#	tmdb_collection_overview=$(echo "$tmdbcollectiondata" | jq -r ".overview")
+	#	tmdb_collection_poster_path=$(echo "$tmdbcollectiondata" | jq -r ".poster_path")
+	#	tmdb_collection_backdrop_path=$(echo "$tmdbcollectiondata" | jq -r ".backdrop_path")
+	#	echo "	<set>" >> "$nfo"
+	#	echo "	    <name>$tmdb_collection_name</name>" >> "$nfo"
+	#	echo "	    <overview>$tmdb_collection_overview</overview>" >> "$nfo"
+	#	echo "	</set>" >> "$nfo"
+	# fi
 	if [ ! -z "$tmdb_keywords_names" ]; then
 		for keyword in ${!tmdb_keywords_names[@]}; do
 			name="${tmdb_keywords_names[$keyword]}"
@@ -197,6 +197,7 @@ WriteNFO () {
 		else
 			echo "		<thumb/>" >> "$nfo"
 		fi
+		echo "		<profile>https://www.themoviedb.org/person/$tmdbid</profile>" >> "$nfo"
 		echo "		<tmdbid>$tmdbid</tmdbid>" >> "$nfo"
 		echo "	</actor>" >> "$nfo"
 	done
