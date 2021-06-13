@@ -14,7 +14,7 @@ if [ $radarr_eventtype == "Test" ]; then
 fi
 
 WriteNFO () {
-	radarrmoviedata="$(curl -s --header "X-Api-Key:"${RadarrAPIkey} --request GET  "$RadarrUrl/api/movie/$radarrid")"
+	radarrmoviedata="$(curl -s --header "X-Api-Key:"${RadarrAPIkey} --request GET  "$RadarrUrl/api/v3/movie/$radarrid")"
 	radarrmoviecredit="$(curl -s --header "X-Api-Key:"${RadarrAPIkey} --request GET  "$RadarrUrl/api/v3/credit?movieId=$radarrid")"
 	radarrmovietitle="$(echo "${radarrmoviedata}" | jq -r ".title")"
 	radarrmoviepath="$(echo "${radarrmoviedata}" | jq -r ".path")"
