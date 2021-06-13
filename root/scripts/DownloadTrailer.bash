@@ -159,7 +159,7 @@ fi
 
 
 radarrid="$radarr_movie_id"
-radarrmoviedata="$(curl -s --header "X-Api-Key:"${RadarrAPIkey} --request GET  "$RadarrUrl/api/movie/$radarrid")"
+radarrmoviedata="$(curl -s --header "X-Api-Key:"${RadarrAPIkey} --request GET  "$RadarrUrl/api/v3/movie/$radarrid")"
 radarrmoviecredit="$(curl -s --header "X-Api-Key:"${RadarrAPIkey} --request GET  "$RadarrUrl/api/v3/credit?movieId=$radarrid")"
 radarrmoviedirector="$(echo "${radarrmoviecredit}" | jq -r ".[] | select(.job==\"Director\") | .personName"  | head -n 1)"
 radarrmovietitle="$(echo "${radarrmoviedata}" | jq -r ".title")"
