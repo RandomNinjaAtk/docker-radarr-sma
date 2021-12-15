@@ -19,7 +19,7 @@ if [ $radarr_eventtype == "Test" ]; then
 	exit 0	
 fi
 
-echo "### SCRIPT VERSION 0.1"
+echo "### SCRIPT VERSION 0.2"
 echo "### DOCKER VERSION $VERSION"
 echo "### CONFIGURATION VERIFICATION"
 error=0
@@ -326,7 +326,7 @@ for id in ${!themoviedbvideoslistids[@]}; do
 
 	echo "$currentprocessid of $radarrmovietotal :: $radarrmovietitle :: $currentsubprocessid of $themoviedbvideoslistidscount :: $folder :: $themoviedbvidename :: Sending Trailer link to youtube-dl..."
 	echo "=======================START YOUTUBE-DL========================="
-	python3 $YoutubeDL ${cookies} -o "$tempfile" ${videoformat} --write-sub --sub-lang $subtitlelanguage --embed-subs --merge-output-format mkv --no-mtime --geo-bypass "$youtubeurl"
+	yt-dlp -o "$tempfile" ${videoformat} --write-sub --sub-lang $subtitlelanguage --embed-subs --merge-output-format mkv --no-mtime --geo-bypass "$youtubeurl"
 	echo "========================STOP YOUTUBE-DL========================="
 	if [ -f "$tempfile.mkv" ]; then
 		audiochannels="$(ffprobe -v quiet -print_format json -show_streams "$tempfile.mkv" | jq -r ".[] | .[] | select(.codec_type==\"audio\") | .channels")"
