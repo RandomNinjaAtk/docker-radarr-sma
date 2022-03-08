@@ -26,6 +26,8 @@ The architectures supported by this image are:
 | Tag | Description |
 | :----: | --- |
 | latest | Radarr Stable + SMA + ffmpeg |
+| develop | Radarr Develop + SMA + ffmpeg |
+| nightly | Radarr Nightly + SMA + ffmpeg |
 
 ## Parameters
 
