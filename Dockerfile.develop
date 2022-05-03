@@ -17,6 +17,9 @@ RUN \
 		python3 \
 		py3-pip \
 		ffmpeg && \
+	echo "************ install python packages ************" && \
+	python3 -m pip install --no-cache-dir -U \
+		yq && \
 	echo "************ setup SMA ************" && \
 	echo "************ setup directory ************" && \
 	mkdir -p ${SMA_PATH} && \
