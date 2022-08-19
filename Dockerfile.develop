@@ -1,4 +1,4 @@
-FROM linuxserver/radarr:develop
+FROM linuxserver/radarr:amd64-develop
 LABEL maintainer="RandomNinjaAtk"
 
 ENV SMA_PATH /usr/local/sma
