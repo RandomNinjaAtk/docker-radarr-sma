@@ -1,3 +1,11 @@
+# Deprecated
+
+This repository is now deprecated, will no longer be updated and is being archived. Please visit the new project/replacement:
+* [https://github.com/RandomNinjaAtk/docker-radarr-extended](https://github.com/RandomNinjaAtk/docker-radarr-extended)
+
+<br />
+<br />
+
 # [RandomNinjaAtk/radarr-sma](https://github.com/RandomNinjaAtk/docker-radarr-sma)
 
 [Radarr](https://github.com/Radarr/Radarr) - A fork of Sonarr to work with movies à la Couchpotato.
